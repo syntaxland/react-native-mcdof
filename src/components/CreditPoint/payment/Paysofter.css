@@ -1,0 +1,27 @@
+/* Paysofter.css */
+
+.rounded-select {
+    border-radius: 5px;  
+    /* border-radius: 25px;   */
+    width: 150px; 
+
+    /* background-image: url('path_to_arrow_icon.png'); 
+    background-repeat: no-repeat;
+    background-position: right center; 
+    background-size: 16px; 
+    padding-right: 24px; */
+  }
+  
+
+  /* Add this CSS to your stylesheets or use a CSS-in-JS solution */
+.modal-body {
+  display: flex;
+}
+
+.modal-body > .col-md-3 {
+  padding: 10px; /* Adjust as needed */
+}
+
+.modal-body > .col-md-9 {
+  padding: 10px; /* Adjust as needed */
+}
