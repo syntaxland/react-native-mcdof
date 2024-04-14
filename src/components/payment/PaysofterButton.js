@@ -28,10 +28,9 @@ const PaysofterButton = ({
 
   useEffect(() => {
     if (!userInfo) {
-      // Redirect to login if user is not logged in
-      // You can implement your navigation logic here
+      navigation.navigate("Login"); 
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const [selectedPaymentOption, setSelectedPaymentOption] = useState("card");
   const [showMoreOptions, setShowMoreOptions] = useState(false);

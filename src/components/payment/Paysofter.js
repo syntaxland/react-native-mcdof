@@ -31,10 +31,9 @@ const Paysofter = ({
 
   useEffect(() => {
     if (!userInfo) {
-      // Redirect to login if user is not logged in
-      // You can implement your navigation logic here
+      navigation.navigate("Login"); 
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;

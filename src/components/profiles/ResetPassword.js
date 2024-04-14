@@ -1,74 +1,101 @@
 // ResetPassword.js
 import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
 import { resetPassword } from "../../actions/userProfileActions";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import Message from "../Message";
-import Loader from "../Loader";
 
-function ResetPassword() {
+const ResetPassword = ({ route, navigation }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
-  const { token } = useParams();
+  const { token } = route.params;
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const resetPwd = useSelector((state) => state.resetPassword);
   const { success, error, loading } = resetPwd;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (success) {
+      setTimeout(() => {
+        navigation.navigate("Login");
+      }, 3000);
+    }
+  }, [success, navigation]);
+
+  const handleSubmit = () => {
     if (newPassword === confirmNewPassword) {
       dispatch(resetPassword(token, newPassword));
     }
   };
 
-  useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        history.push("/login");
-      }, 3000);
-    }
-  }, [success, history]);
-
   return (
-    <Container>
-      <Row className="justify-content-center mt-3">
-        <Col md={6}>
-          <h1 className="text-center">Reset Password</h1>
-          {success && (
-            <Message variant="success">Password reset successfully.</Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
-          {loading && <Loader />}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="newPassword">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="confirmNewPassword">
-              <Form.Label>Confirm New Password</Form.Label>
-              <Form.Control
-                type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                required
-              />
-            </Form.Group>
-            <Button type="submit" variant="success" className="rounded mt-2 w-100">
-              Reset Password
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.title}>Reset Password</Text>
+      {success && <Text style={styles.successMessage}>Password reset successfully.</Text>}
+      {error && <Text style={styles.errorMessage}>{error}</Text>}
+      <TextInput
+        style={styles.input}
+        placeholder="New Password"
+        value={newPassword}
+        onChangeText={setNewPassword}
+        secureTextEntry
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm New Password"
+        value={confirmNewPassword}
+        onChangeText={setConfirmNewPassword}
+        secureTextEntry
+      />
+      <Button
+        title="Reset Password"
+        onPress={handleSubmit}
+        disabled={loading}
+        color="#007bff"
+      />
+      {loading && <ActivityIndicator style={styles.loader} size="large" color="#007bff" />}
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  input: {
+    width: "100%",
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 16,
+    paddingLeft: 10,
+  },
+  successMessage: {
+    color: "green",
+    marginBottom: 16,
+  },
+  errorMessage: {
+    color: "red",
+    marginBottom: 16,
+  },
+  loader: {
+    marginTop: 16,
+  },
+});
 
 export default ResetPassword;

@@ -1,14 +1,14 @@
 // MessageInbox.js
 import React, { useEffect, useState } from "react";
+import { View, Text, Button, FlatList } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { ListGroup, Button } from "react-bootstrap";
 import { getMessages } from "../../actions/messagingActions";
 import Message from "../Message";
 import Loader from "../Loader";
 import DOMPurify from "dompurify";
 
 const MessageInbox = () => {
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
 
   const messaging = useSelector((state) => state.messaging);
   const { loading, messages, loadingError } = messaging;
@@ -16,109 +16,102 @@ const MessageInbox = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = messages.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(messages.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
-
   useEffect(() => {
     dispatch(getMessages());
   }, [dispatch]);
 
-  const [expandedMessages, setExpandedMessages] = useState([]);
-
-  const expandMessage = (messageId) => {
-    setExpandedMessages((prevExpanded) => [...prevExpanded, messageId]);
-  };
+  const renderItem = ({ item }) => (
+    <View>
+      <Text style={styles.subject}>{item.subject}</Text>
+      <Text style={styles.sender}>{item.sender.username}</Text>
+      <Text style={styles.timestamp}>
+        {new Date(item.timestamp).toLocaleString()}
+      </Text>
+      <Text style={styles.message}>
+        {item.message.split(" ").length > 10
+          ? item.message.split(" ").slice(0, 10).join(" ") + " ..."
+          : item.message}
+      </Text>
+      {item.message.split(" ").length > 10 && (
+        <Button
+          title="Read More"
+          onPress={() => expandMessage(item.id)}
+          color="#007bff"
+        />
+      )}
+    </View>
+  );
 
   return (
-    <div>
-      <h2 className="text-center py-3">Message Inbox</h2>
+    <View>
+      <Text style={styles.title}>Message Inbox</Text>
       {loadingError && <Message variant="danger">{loadingError}</Message>}
       {loading ? (
         <Loader />
       ) : (
         <>
-          <ListGroup>
-            {currentItems.map((message) => (
-              <ListGroup.Item key={message.id}>
-                <h4>{message.subject}</h4>
-                <p>{message.sender.username}</p>
-                <p>{new Date(message.timestamp).toLocaleString()}</p>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      expandedMessages.includes(message.id)
-                        ? message.message
-                        : message.message.split(" ").length > 10
-                        ? message.message.split(" ").slice(0, 10).join(" ") + " ..."
-                        : message.message
-                    ),
-                  }}
-                />
-                {message.message.split(" ").length > 10 &&
-                  !expandedMessages.includes(message.id) && (
-                    <Button
-                      variant="link"
-                      onClick={() => expandMessage(message.id)}
-                    >
-                      Read More
-                    </Button>
-                  )}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-          <nav className="mt-4">
-            <ul className="pagination justify-content-center">
-              <li
-                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => paginate(currentPage - 1)}
-                >
-                  Previous
-                </button>
-              </li>
-              {pageNumbers.map((number) => (
-                <li
-                  key={number}
-                  className={`page-item ${
-                    currentPage === number ? "active" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => paginate(number)}
-                  >
-                    {number}
-                  </button>
-                </li>
-              ))}
-              <li
-                className={`page-item ${
-                  currentPage === pageNumbers.length ? "disabled" : ""
-                }`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => paginate(currentPage + 1)}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <FlatList
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+          />
+          {/* Pagination buttons */}
+          <View style={styles.pagination}>
+            <Button
+              title="Previous"
+              onPress={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              color="#007bff"
+            />
+            <Text style={styles.pageNumber}>{currentPage}</Text>
+            <Button
+              title="Next"
+              onPress={() => setCurrentPage(currentPage + 1)}
+              disabled={
+                currentPage * itemsPerPage >= messages.length || loading
+              }
+              color="#007bff"
+            />
+          </View>
         </>
       )}
-    </div>
+    </View>
   );
+};
+
+const styles = {
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  subject: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  sender: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  timestamp: {
+    fontSize: 14,
+    marginBottom: 5,
+  },
+  message: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  pageNumber: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
 };
 
 export default MessageInbox;

@@ -13,10 +13,17 @@ import axios from 'axios';
 import { API_URL } from "../../config/apiConfig"; 
 
 const PaystackPayment = () => {
+  const dispatch = useDispatch();
+
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login"); 
+    }
+  }, [userInfo, navigation]);
+
 
   const [paystackPublicKey, setPaystackPublicKey] = useState('');
   const [reference, setReference] = useState('');

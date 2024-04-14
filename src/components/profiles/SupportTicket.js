@@ -1,125 +1,76 @@
 // SupportTicket.js
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
-import { Table, Button } from "react-bootstrap";
 import {
-  listSupportTicket,
-  // listSupportMessage,
-} from "../../actions/supportActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import Pagination from "../Pagination";
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { styles } from "../screenStyles";
+import { listSupportTicket } from "../../actions/supportActions";
 
-function SupportTicket() {
+const SupportTicket = () => {
+  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const history = useHistory();
-  const listSupportTicketState = useSelector( 
-    (state) => state.listSupportTicketState
-  );
+  const listSupportTicketState = useSelector((state) => state.listSupportTicketState);
   const { loading, tickets, error } = listSupportTicketState;
-  console.log("tickets:", tickets);
-
-  //  const replySupportTicketState = useSelector(
-  //   (state) => state.replySupportTicketState
-  // );
-  // const { loading, success, error } = replySupportTicketState;
-
-  // const listSupportMessageState = useSelector(
-  //   (state) => state.listSupportMessageState
-  // );
-  // const {
-  //   loading: listSupportMessageloading,
-  //   ticketMessages,
-  //   error: listSupportMessageError,
-  // } = listSupportMessageState;
-  // console.log("ticketMessages:", ticketMessages);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  //   const currentItems = tickets.slice(indexOfFirstItem, indexOfLastItem);
-  const currentItems = tickets
-    ? tickets.slice(indexOfFirstItem, indexOfLastItem)
-    : [];
-
   useEffect(() => {
     dispatch(listSupportTicket());
-    // dispatch(listSupportMessage());
   }, [dispatch]);
 
   const handleCreateTicket = () => {
-    history.push("/create-support-ticket");
+    navigation.navigate("CreateSupportTicket");
   };
 
   return (
-    <div>
-      <h1 className="text-center py-3">
-        <i className="fas fa-ticket"></i> Support Ticket
-      </h1>
-      {loading  ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
-      ) : (
-        <>
-          {currentItems.length === 0 ? (
-            <div className="text-center py-3">Support Ticket appear here.</div>
-          ) : (
-            <Table striped bordered hover responsive className="table-sm">
-              <thead>
-                <tr>
-                  <th>SN</th>
-                  <th>Ticket ID</th>
-                  {/* <th>User</th> */}
-                  <th>Subject</th>
-                  <th>Category</th>
-                  {/* <th>Message</th> */}
-                  <th>Status</th>
-                  <th>Resolved</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((ticket, index) => (
-                  <tr key={ticket.id}>
-                    <td>{index + 1}</td>
-                    <td>
-                      <Link to={`/support/ticket/${ticket.ticket_id}`}> 
-                        #{ticket.ticket_id}
-                      </Link>
-                    </td>
-                    {/* <td>{ticket.email}</td> */}
-                    <td>{ticket.subject}</td>
-                    <td>{ticket.category}</td>
-                    {/* <td>{ticket.message}</td> */}
-                    <td>
-                      {ticket.is_closed ? (
-                        <span style={{ color: "red" }}>Closed</span>
-                      ) : (
-                        <span style={{ color: "green" }}>Active</span>
-                      )}
-                    </td>
-                    <td>
-                      {ticket.is_resolved ? (
-                        <i
-                          className="fas fa-check-circle"
-                          style={{ fontSize: "16px", color: "green" }}
-                        ></i>
-                      ) : (
-                        <i
-                          className="fas fa-times-circle"
-                          style={{ fontSize: "16px", color: "red" }}
-                        ></i>
-                      )}
-                    </td>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Support Ticket</Text>
 
-                    <td>
-                      {new Date(ticket.created_at).toLocaleString("en-US", {
+        {loading && <Loader />}
+        {error && <Message variant="danger">{error}</Message>}
+
+        {tickets && tickets.length === 0 ? (
+          <View style={styles.textContainer}>
+            <Text style={styles.text}>Support Ticket appear here.</Text>
+          </View>
+        ) : (
+          <View>
+            <FlatList
+              data={tickets}
+              keyExtractor={(item) => item.ticket_id.toString()}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("SupportTicketDetail", { ticketId: item.ticket_id })}
+                >
+                  <View style={styles.listItem}>
+                    <Text style={styles.listItemText}>{`#${item.ticket_id}`}</Text>
+                    <Text style={styles.listItemText}>{item.subject}</Text>
+                    <Text style={styles.listItemText}>{item.category}</Text>
+                    <Text style={[styles.listItemText, { color: item.is_closed ? "red" : "green" }]}>
+                      {item.is_closed ? "Closed" : "Active"}
+                    </Text>
+                    <Text style={styles.listItemText}>
+                      {item.is_resolved ? (
+                        <FontAwesome
+                          icon={faCheckCircle}
+                          style={[styles.icon, { color: "green" }]}
+                        />
+                      ) : (
+                        <FontAwesome
+                          icon={faTimesCircle}
+                          style={[styles.icon, { color: "red" }]}
+                        />
+                      )}
+                    </Text>
+                    <Text style={styles.listItemText}>
+                      {new Date(item.created_at).toLocaleString("en-US", {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
@@ -128,33 +79,25 @@ function SupportTicket() {
                         minute: "numeric",
                         second: "numeric",
                       })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-          <div className="py-2">
-            <Pagination
-              itemsPerPage={itemsPerPage}
-              totalItems={tickets.length}
-              currentPage={currentPage}
-              paginate={paginate}
-            /> 
-          </div>
-        </>
-      )}
-      <div className="d-flex justify-content-center mt-5 py-3">
-        <Button
-          variant="success"
-          onClick={handleCreateTicket}
-          className="rounded"
-        >
-          Create A New Support Ticket
-        </Button>
-      </div>
-    </div>
-  ); 
-}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        )}
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCreateTicket}
+          >
+            <Text style={styles.buttonText}>Create A New Support Ticket</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
 
 export default SupportTicket;

@@ -1,21 +1,16 @@
 // Feedback.js
 import React, { useEffect } from "react";
-import { Button, Row, Col } from "react-bootstrap";
+import { View, Text, Button, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory } from "@react-navigation/native";
 import { listFeedbacks } from "../../actions/feedbackActions";
 
-function Feedback() {
-  const history = useHistory();
+const FeedbackScreen = () => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const feedbackList = useSelector((state) => state.feedbackList);
-  const {
-    // loading: listSupportTicketLoading,
-    feedbacks,
-    // error: listSupportTicketError,
-  } = feedbackList;
-  console.log("feedbacks:", feedbacks);
+  const { feedbacks } = feedbackList;
 
   useEffect(() => {
     dispatch(listFeedbacks());
@@ -26,26 +21,34 @@ function Feedback() {
   };
 
   return (
-    <Row>
-      <Col>
-        <div className="py-3">
-          <div className="d-flex justify-content-center mt-5 py-3"> 
-            <p>Would you want to send us a feedback?</p>
-            {"  "}
-            <p>
-              <Button
-                variant="primary"
-                onClick={handleSendFeedback}
-                className="rounded"
-              >
-                Send Feedback
-              </Button>
-            </p>
-          </div>
-        </div>
-      </Col>
-    </Row>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.title}>Would you like to send us feedback?</Text>
+        <Button
+          title="Send Feedback"
+          onPress={handleSendFeedback}
+          color="#007bff"
+        />
+      </View>
+    </View>
   );
-}
+};
 
-export default Feedback;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  content: {
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+});
+
+export default FeedbackScreen;

@@ -120,7 +120,7 @@ const ShipmentScreen = () => {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 };
 

@@ -1,127 +1,131 @@
 // OrderShipment.js
 import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Table } from "react-bootstrap";
 import { getUserShipments } from "../../actions/orderActions";
 import Message from "../Message";
 import Loader from "../Loader";
 
-function OrderShipment() {
+const OrderShipment = () => {
   const dispatch = useDispatch();
 
   const userShipments = useSelector((state) => state.userShipments);
   const { loading, error, shipments } = userShipments;
-  console.log("User shipments:", shipments);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = shipments.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(shipments.length / itemsPerPage); i++) {
-    pageNumbers.push(i);
-  }
 
   useEffect(() => {
     dispatch(getUserShipments());
   }, [dispatch]);
 
+  // Function to get current items for the current page
+  const getCurrentItems = () => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return shipments.slice(indexOfFirstItem, indexOfLastItem);
+  };
+
+  // Function to handle pagination
+  const handlePaginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
-    <div>
-      <h2 className="text-center py-3">Shipments</h2>
+    <View style={styles.container}>
+      <Text style={styles.title}>Shipments</Text>
       {loading ? (
         <Loader />
       ) : error ? (
         <Message variant="danger">{error}</Message>
       ) : (
         <>
-          <Table striped bordered hover responsive className="table-sm">
-            <thead>
-              <tr>
-                <th>SN</th>
-                <th>Order ID</th>
-                {/* <th>User</th> */}
-                {/* <th>Email</th> */}
-                <th>Address</th>
-                <th>City</th>
-                <th>Postal Code</th>
-                <th>Country</th>
-                <th>Shipping Price</th>
-                <th>Is Delivered</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentItems.map((address, index) => (
-                <tr key={address._id}>
-                  <td>{index + 1}</td>
-                  <td>{address.order.order_id}</td>
-                  {/* <td>{address.order.user.first_name}</td> */}
-                  {/* <td>{address.order.user.email}</td> */}
-                  <td>{address.address}</td>
-                  <td>{address.city}</td>
-                  <td>{address.postalCode}</td>
-                  <td>{address.country}</td>
-                  <td>{address.shippingPrice}</td>
-                  <td>{address.isDelivered ? "Yes" : "No"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-
-          <nav className="mt-4">
-            <ul className="pagination justify-content-center">
-              <li
-                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => paginate(currentPage - 1)}
-                >
-                  Previous
-                </button>
-              </li>
-              {pageNumbers.map((number) => (
-                <li
-                  key={number}
-                  className={`page-item ${
-                    currentPage === number ? "active" : ""
-                  }`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => paginate(number)}
-                  >
-                    {number}
-                  </button>
-                </li>
-              ))}
-              <li
-                className={`page-item ${
-                  currentPage === pageNumbers.length ? "disabled" : ""
-                }`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => paginate(currentPage + 1)}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
+          <FlatList
+            data={getCurrentItems()}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item, index }) => (
+              <View style={styles.shipmentItem}>
+                <Text style={styles.itemText}>Order ID: {item.order.order_id}</Text>
+                <Text style={styles.itemText}>Address: {item.address}</Text>
+                <Text style={styles.itemText}>City: {item.city}</Text>
+                <Text style={styles.itemText}>Postal Code: {item.postalCode}</Text>
+                <Text style={styles.itemText}>Country: {item.country}</Text>
+                <Text style={styles.itemText}>Shipping Price: {item.shippingPrice}</Text>
+                <Text style={styles.itemText}>Is Delivered: {item.isDelivered ? "Yes" : "No"}</Text>
+              </View>
+            )}
+          />
+          <View style={styles.pagination}>
+            <TouchableOpacity
+              onPress={() => handlePaginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <Text style={styles.pageButton}>Previous</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageNumber}>{currentPage}</Text>
+            <TouchableOpacity
+              onPress={() => handlePaginate(currentPage + 1)}
+              disabled={currentPage === Math.ceil(shipments.length / itemsPerPage)}
+            >
+              <Text style={styles.pageButton}>Next</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
-      <hr />
-      <div>
-        <h2 className="text-center py-3">Live Shipment Tracking</h2>
-      </div>
-    </div>
+      <View style={styles.liveTracking}>
+        <Text style={styles.title}>Live Shipment Tracking</Text>
+      </View>
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  shipmentItem: {
+    marginBottom: 16,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 8,
+  },
+  itemText: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  pageButton: {
+    fontSize: 16,
+    fontWeight: "bold",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: "#007bff",
+    color: "#fff",
+    borderRadius: 4,
+    marginHorizontal: 8,
+  },
+  pageNumber: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginHorizontal: 8,
+  },
+  liveTracking: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
+  },
+});
 
 export default OrderShipment;

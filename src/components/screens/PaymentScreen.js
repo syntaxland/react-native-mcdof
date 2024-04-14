@@ -7,7 +7,7 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
-  // Button as RNButton,
+  // Button ,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
@@ -26,9 +26,14 @@ const PaymentScreen = () => {
   const order_id = route.params.id;
 
   
-
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login"); 
+    }
+  }, [userInfo, navigation]);
 
    const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;

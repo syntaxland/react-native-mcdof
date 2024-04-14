@@ -1,16 +1,12 @@
 // ChangePassword.js
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { changePassword } from "../../actions/userProfileActions";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
 
-import Message from "../Message";
-import Loader from "../Loader";
-
-function ChangePassword() {
+const ChangePasswordScreen = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -18,71 +14,72 @@ function ChangePassword() {
   const userChangePassword = useSelector((state) => state.userChangePassword);
   const { success, error, loading } = userChangePassword;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (newPassword === confirmNewPassword) {
       dispatch(changePassword(oldPassword, newPassword));
     }
   };
 
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => {
-        history.push("/login");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, history]);
-
   return (
-    <Container>
-      <Row className="justify-content-center mt-3">
-        <Col md={6}>
-      <h2 className="text-center">Change Password</h2>
-      {success && (
-        <Message variant="success">Password changed successfully.</Message>
-      )}
-      {error && <Message variant="danger">{error}</Message>}
-      {loading && <Loader />}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="oldPassword">
-          <Form.Label>Old Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={oldPassword}
-            className="rounded"
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group controlId="newPassword">
-          <Form.Label>New Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={newPassword}
-            className="rounded"
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Form.Group controlId="confirmNewPassword">
-          <Form.Label>Confirm New Password</Form.Label>
-          <Form.Control
-            type="password"
-            value={confirmNewPassword}
-            className="rounded"
-            onChange={(e) => setConfirmNewPassword(e.target.value)}
-            required
-          />
-        </Form.Group>
-        <Button type="submit" variant="success" className="rounded mt-2 w-100">
-          Change Password
-        </Button>
-      </Form>
-      </Col>
-      </Row>
-    </Container>
+    <View style={styles.container}>
+      <Text style={styles.title}>Change Password</Text>
+      {success && <Text style={styles.successMessage}>Password changed successfully.</Text>}
+      {error && <Text style={styles.errorMessage}>{error}</Text>}
+      <TextInput
+        style={styles.input}
+        placeholder="Old Password"
+        secureTextEntry={true}
+        value={oldPassword}
+        onChangeText={setOldPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="New Password"
+        secureTextEntry={true}
+        value={newPassword}
+        onChangeText={setNewPassword}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm New Password"
+        secureTextEntry={true}
+        value={confirmNewPassword}
+        onChangeText={setConfirmNewPassword}
+      />
+      <Button title="Change Password" onPress={handleSubmit} disabled={loading} />
+    </View>
   );
-}
+};
 
-export default ChangePassword;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  input: {
+    width: "80%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  successMessage: {
+    color: "green",
+    marginBottom: 16,
+  },
+  errorMessage: {
+    color: "red",
+    marginBottom: 16,
+  },
+});
+
+export default ChangePasswordScreen;

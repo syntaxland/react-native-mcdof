@@ -1,14 +1,17 @@
 // SavedItems.js
 import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { Row, Col } from "react-bootstrap";
+import { useNavigation } from '@react-navigation/native';
 import { getUserFavoriteProducts } from '../../actions/productAction';
 import Product from '../Product';
 import Message from '../Message';
 import Loader from '../Loader';
+import { styles } from '../screenStyles';
 
-function SavedItems() {
+const SavedItems = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   useEffect(() => { 
     dispatch(getUserFavoriteProducts());
@@ -22,90 +25,67 @@ function SavedItems() {
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = products.slice(
-    indexOfFirstItem,
-    indexOfLastItem
+  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const renderProductItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.productItemContainer}
+      onPress={() => navigation.navigate('ProductDetails', { productId: item._id })}
+    >
+      <Product product={item} />
+    </TouchableOpacity>
   );
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const pageNumbers = [];
-  for (
-    let i = 1;
-    i <= Math.ceil(products.length / itemsPerPage);
-    i++
-  ) {
-    pageNumbers.push(i);
-  }
 
   return (
-    <div>
-      <Row>
-        <Col>
-          <h1 className="text-center">Saved Products</h1>
-          {loading ? (
-            <Loader />
-          ) : error ? (
-            <Message variant="danger">{error}</Message>
-          ) : (
-            <>
-              <Row>
-                {currentItems.map((product) => (
-                  <Col key={product._id} xs={12} sm={12} md={6} lg={4} xl={3}>
-                    <Product product={product} />
-                  </Col>
-                ))}
-              </Row>
-
-              <nav className="mt-4">
-                <ul className="pagination justify-content-center">
-                  <li
-                    className={`page-item ${
-                      currentPage === 1 ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage - 1)}
-                    >
-                      Previous
-                    </button>
-                  </li>
-                  {pageNumbers.map((number) => (
-                    <li
-                      key={number}
-                      className={`page-item ${
-                        currentPage === number ? "active" : ""
-                      }`}
-                    >
-                      <button
-                        className="page-link"
-                        onClick={() => paginate(number)}
-                      >
-                        {number}
-                      </button>
-                    </li>
-                  ))}
-                  <li
-                    className={`page-item ${
-                      currentPage === pageNumbers.length ? "disabled" : ""
-                    }`}
-                  >
-                    <button
-                      className="page-link"
-                      onClick={() => paginate(currentPage + 1)}
-                    >
-                      Next
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </>
-          )}
-        </Col>
-      </Row>
-    </div>
+    <View style={styles.container}>
+      <Text style={styles.title}>Saved Products</Text>
+      {loading ? (
+        <Loader />
+      ) : error ? (
+        <Message variant="danger">{error}</Message>
+      ) : (
+        <FlatList
+          data={currentItems}
+          renderItem={renderProductItem}
+          keyExtractor={(item) => item._id.toString()}
+          style={styles.productList}
+        />
+      )}
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity
+          style={[styles.paginationButton, currentPage === 1 && styles.disabled]}
+          onPress={prevPage}
+          disabled={currentPage === 1}
+        >
+          <Text style={styles.paginationButtonText}>Previous</Text>
+        </TouchableOpacity>
+        <Text style={styles.paginationText}>
+          Page {currentPage} of {totalPages}
+        </Text>
+        <TouchableOpacity
+          style={[styles.paginationButton, currentPage === totalPages && styles.disabled]}
+          onPress={nextPage}
+          disabled={currentPage === totalPages}
+        >
+          <Text style={styles.paginationButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
-}
+};
 
 export default SavedItems;

@@ -1,24 +1,27 @@
 // SupportMessage.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Table, Button } from "react-bootstrap";
+import { useNavigation } from "@react-navigation/native";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
-  listSupportTicket,
-  listSupportMessage,
-} from "../../actions/supportActions";
+  faTicket,
+  faCheckCircle,
+  faTimesCircle,
+} from "@fortawesome/free-solid-svg-icons";
+import { Table } from "react-native-table-component";
+import { styles } from "../screenStyles";
+import Loader from "../Loader";
 import Message from "../Message";
-import Loader from "../Loader";  
 import Pagination from "../Pagination";
 
-function SupportMessage() {
+const SupportMessage = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+
   const listSupportTicketState = useSelector(
     (state) => state.listSupportTicketState
   );
-  const { loading, success, tickets, error } = listSupportTicketState;
-  console.log("tickets:", tickets);
+  const { loading, tickets, error } = listSupportTicketState;
 
   const listSupportMessageState = useSelector(
     (state) => state.listSupportMessageState
@@ -28,19 +31,11 @@ function SupportMessage() {
     ticketMessages,
     error: listSupportMessageError,
   } = listSupportMessageState;
-  console.log("ticketMessages:", ticketMessages);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  //   const currentItems = tickets.slice(indexOfFirstItem, indexOfLastItem);
-  const currentItems = ticketMessages
-    ? ticketMessages.slice(indexOfFirstItem, indexOfLastItem)
-    : [];
 
   useEffect(() => {
     dispatch(listSupportTicket());
@@ -48,68 +43,56 @@ function SupportMessage() {
   }, [dispatch]);
 
   const handleCreateTicket = () => {
-    history.push("/create-support-message");
+    navigation.navigate("CreateSupportMessage");
   };
 
   return (
-    <div>
-      <h1 className="text-center py-3">
-        <i className="fas fa-ticket"></i> Support Ticket
-      </h1>
-      {loading || listSupportMessageloading ? (
-        <Loader />
-      ) : error ? (
-        <Message variant="danger">{error}</Message>
-      ) : (
-        <>
-          {currentItems.length === 0 ? (
-            <div className="text-center py-3">Support Ticket appear here.</div>
-          ) : (
-            <Table striped bordered hover responsive className="table-sm">
-              <thead>
-                <tr>
-                  <th>SN</th>
-                  <th>Ticket ID</th>
-                  <th>User</th>
-                  <th>Subject</th>
-                  <th>Category</th>
-                  <th>Message</th>
-                  <th>Status</th>
-                  <th>Resolved</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((ticket, index) => (
-                  <tr key={ticket.id}>
-                    <td>{index + 1}</td>
-                    <td>{ticket.ticket_id}</td>
-                    <td>{ticket.email}</td>
-                    <td>{ticket.subject}</td>
-                    <td>{ticket.category}</td>
-                    <td>{ticket.message}</td>
-                    <td>
-                      {!ticket.is_closed ? (
-                        <span style={{ color: "red" }}>Closed</span>
-                      ) : (
-                        <span style={{ color: "green" }}>Active</span>
-                      )}
-                    </td>
-                    <td>
-                    {!ticket.is_resolved ? (
-                      <i
-                        className="fas fa-check-circle"
-                        style={{ fontSize: "16px", color: "green" }}
-                      ></i>
-                    ) : (
-                      <i
-                        className="fas fa-times-circle"
-                        style={{ fontSize: "16px", color: "red" }}
-                      ></i>
-                    )}
-                  </td>
-                    
-                    <td>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          <FontAwesomeIcon icon={faTicket} size={24} color="black" /> Support Ticket
+        </Text>
+
+        {loading || listSupportMessageloading ? (
+          <Loader />
+        ) : error ? (
+          <Message variant="danger">{error}</Message>
+        ) : (
+          <>
+            {ticketMessages.length === 0 ? (
+              <Text style={styles.emptyText}>Support Ticket appear here.</Text>
+            ) : (
+              <Table style={styles.table}>
+                <Table.Header>
+                  <Table.Cell>SN</Table.Cell>
+                  <Table.Cell>Ticket ID</Table.Cell>
+                  <Table.Cell>User</Table.Cell>
+                  <Table.Cell>Subject</Table.Cell>
+                  <Table.Cell>Category</Table.Cell>
+                  <Table.Cell>Message</Table.Cell>
+                  <Table.Cell>Status</Table.Cell>
+                  <Table.Cell>Resolved</Table.Cell>
+                  <Table.Cell>Created At</Table.Cell>
+                </Table.Header>
+                {ticketMessages.map((ticket, index) => (
+                  <Table.Row key={ticket.id}>
+                    <Table.Cell>{index + 1}</Table.Cell>
+                    <Table.Cell>{ticket.ticket_id}</Table.Cell>
+                    <Table.Cell>{ticket.email}</Table.Cell>
+                    <Table.Cell>{ticket.subject}</Table.Cell>
+                    <Table.Cell>{ticket.category}</Table.Cell>
+                    <Table.Cell>{ticket.message}</Table.Cell>
+                    <Table.Cell style={{ color: !ticket.is_closed ? "red" : "green" }}>
+                      {!ticket.is_closed ? "Closed" : "Active"}
+                    </Table.Cell>
+                    <Table.Cell>
+                      <FontAwesomeIcon
+                        icon={!ticket.is_resolved ? faCheckCircle : faTimesCircle}
+                        size={24}
+                        color={!ticket.is_resolved ? "green" : "red"}
+                      />
+                    </Table.Cell>
+                    <Table.Cell>
                       {new Date(ticket.created_at).toLocaleString("en-US", {
                         weekday: "long",
                         year: "numeric",
@@ -119,31 +102,28 @@ function SupportMessage() {
                         minute: "numeric",
                         second: "numeric",
                       })}
-                    </td>
-                  </tr>
+                    </Table.Cell>
+                  </Table.Row>
                 ))}
-              </tbody>
-            </Table>
-          )}
-          <Pagination
-            itemsPerPage={itemsPerPage}
-            totalItems={ticketMessages.length}
-            currentPage={currentPage}
-            paginate={paginate}
-          />
-        </>
-      )}
-      <div className="d-flex justify-content-center mt-5 py-3">
-            <Button
-              variant="success"
-              onClick={handleCreateTicket}
-              className="rounded"
-            >
-             Create A New Support Ticket 
-            </Button>
-          </div>
-    </div>
+              </Table>
+            )}
+            <Pagination
+              itemsPerPage={itemsPerPage}
+              totalItems={ticketMessages.length}
+              currentPage={currentPage}
+              paginate={paginate}
+            />
+          </>
+        )}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleCreateTicket}
+        >
+          <Text style={styles.buttonText}>Create A New Support Ticket</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
-}
+};
 
 export default SupportMessage;

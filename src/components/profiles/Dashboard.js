@@ -6,7 +6,7 @@ import { getCreditPointBalance } from "../../redux/actions/creditPointActions";
 import { listPayments } from "../../redux/actions/paymentActions";
 import { getOrders } from "../../redux/actions/orderActions";
 import { LineChart, PieChart } from "react-native-chart-kit";
-// import SellCreditPoint from "../CreditPoint/SellCreditPoint";
+// import SellCreditPoint from "../CreditPoint/SellCreditPoint"; 
 // import SelectCurrency from "../CreditPoint/SelectCurrency";
 
 function Dashboard() {

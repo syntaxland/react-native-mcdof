@@ -1,19 +1,22 @@
 // PaysofterPromise.js
 import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Container, Row, Col, Form, Button, Modal } from "react-bootstrap";
-// import { clearCart } from "../../actions/cartActions";
-// import {
-//   createPayment,
-//   createPaysofterPayment,
-//   debitPaysofterAccountFundPromise,
-// } from "../../actions/paymentActions";
 import Message from "../Message";
 import Loader from "../Loader";
-import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";  
+import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const PaysofterPromise = ({
-  history,
   promoTotalPrice,
   paymentData,
   reference,
@@ -21,15 +24,16 @@ const PaysofterPromise = ({
   publicApiKey,
 }) => {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login"); 
     }
-  }, [userInfo]);
+  }, [userInfo, navigation]);
 
   const debitPaysofterAccountState = useSelector(
     (state) => state.debitPaysofterAccountState
@@ -38,17 +42,11 @@ const PaysofterPromise = ({
 
   const [duration, setDuration] = useState("Within 1 day");
   const [currency, setCurrency] = useState("NGN");
-  const [paymenthMethod, setPaymenthMethod] = useState(
-    "Paysofter Promise"
-  );
-  const [paymentProvider, setPaymentProvider] = useState(
-    "Paysofter"
-  );
-  // const createdAt = new Date().toISOString();
+  const [paymenthMethod, setPaymenthMethod] = useState("Paysofter Promise");
+  const [paymentProvider, setPaymentProvider] = useState("Paysofter");
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const [showPaysofterAccountFundPromise, setShowPaysofterAccountFundPromise] = useState(
-    false
-  );
+  const [showPaysofterAccountFundPromise, setShowPaysofterAccountFundPromise] =
+    useState(false);
 
   const handleShowPaysofterAccountFundPromise = () => {
     setShowPaysofterAccountFundPromise(true);
@@ -62,53 +60,23 @@ const PaysofterPromise = ({
     setShowInfoModal(false);
   };
 
-  // const paysofterPaymentData = {
-  //   payment_id: reference,
-  //   email: userEmail,
-  //   amount: promoTotalPrice,
-  //   public_api_key: publicApiKey,
-  //   created_at: createdAt,
-  // };
-
-  // const debitAccountData = {
-  //   currency: currency,
-  //   amount: promoTotalPrice,
-  //   // account_id: accountId,
-  // };
-
-  const submitHandler = (e) => {
-    e.preventDefault();
-    // try {
-    //   // dispatch(debitPaysofterAccountFundPromise(debitAccountData));
-    // } catch (error) {
-    //   console.log(error);
-    // }
+  const submitHandler = () => {
+    // Handle form submission here
   };
 
   useEffect(() => {
     if (success) {
-      // dispatch(createPaysofterPayment(paysofterPaymentData));
-      // dispatch(createPayment(paymentData));
-      // dispatch(clearCart());
-      const timer = setTimeout(() => {
-        // history.push("/dashboard");
-        // window.location.href = "/dashboard";
-        // window.location.reload();
-      }, 3000);
-      return () => clearTimeout(timer);
+      setTimeout(() => {}, 3000);
     }
-    // console.log("// eslint-disable-next-line");
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [success]);
 
   return (
-    <Container>
+    <>
       {showPaysofterAccountFundPromise ? (
         <PaysofterAccountFundPromise
           promoTotalPrice={promoTotalPrice}
           userEmail={userEmail}
           publicApiKey={publicApiKey}
-          
           paymentData={paymentData}
           reference={reference}
           currency={currency}
@@ -117,175 +85,62 @@ const PaysofterPromise = ({
           paymentProvider={paymentProvider}
         />
       ) : (
-        <Row className="justify-content-center">
-          <Col>
-            <Row className="text-center py-2">
-              <Col md={10}>
-                <h2 className="py-2 text-center">Paysofter Promise</h2>
-              </Col>
-              <Col md={2}>
-                <Button
-                  variant="outline"
-                  onClick={handleInfoModalShow}
-                  data-toggle="tooltip"
-                  data-placement="top"
-                  title="Paysofter Promise option escrows or places in custody the received payment until a specified condition has been fulfilled before payment is transferred to the seller."
-                >
-                  <i className="fa fa-info-circle"> </i>
-                </Button>
+        <View style={{ padding: 16 }}>
+          <View style={{ alignItems: "center" }}>
+            <Text
+              style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}
+            >
+              Paysofter Promise
+            </Text>
+            <TouchableOpacity onPress={handleInfoModalShow}>
+              <FontAwesomeIcon icon={faInfoCircle} size={20} />
+            </TouchableOpacity>
+            <Modal visible={showInfoModal} animationType="slide" transparent>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View style={{ backgroundColor: "white", padding: 20 }}>
+                  <Text>
+                    Paysofter Promise option escrows or places in custody the
+                    payment made to a seller until a specified condition has
+                    been fulfilled.
+                  </Text>
+                  <Button title="Close" onPress={handleInfoModalClose} />
+                </View>
+              </View>
+            </Modal>
+          </View>
 
-                <Modal show={showInfoModal} onHide={handleInfoModalClose}>
-                  <Modal.Header closeButton>
-                    <Modal.Title className="text-center w-100 py-2">
-                      Paysofter Promise
-                    </Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    <p className="text-center">
-                      Paysofter Promise option escrows or places in custody the
-                      payment made to a seller (using the payer's funded
-                      Paysofter Account Fund) until a specified condition has
-                      been fulfilled.{" "}
-                      <a
-                        href="https://paysofter.com/promise/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {" "}
-                        <span>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            className="text-center py-2"
-                          >
-                            Learn more
-                          </Button>
-                        </span>
-                      </a>
-                    </p>
-                  </Modal.Body>
-                </Modal>
-              </Col>
-            </Row>
+          {success && (
+            <Message variant="success">Payment made successfully.</Message>
+          )}
+          {error && <Message variant="danger">{error}</Message>}
+          {loading && <Loader />}
 
-            {success && (
-              <Message variant="success">Payment made successfully.</Message>
-            )}
+          <View style={{ marginVertical: 10 }}>
+            <Text>Currency</Text>
+            <TextInput
+              value={currency}
+              onChangeText={setCurrency}
+              editable={false}
+              style={{ borderWidth: 1, borderColor: "gray", padding: 8 }}
+            />
+          </View>
 
-            {error && <Message variant="danger">{error}</Message>}
-            {loading && <Loader />}
+          {/* Other form fields */}
 
-            <Form onSubmit={submitHandler}>
-              <Form.Group controlId="currency">
-                <Form.Label>Currency</Form.Label>
-                <Form.Control
-                  as="select"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  disabled
-                >
-                  <option value="NGN">NGN</option>
-                  <option value="USD">USD</option>
-                </Form.Control>
-              </Form.Group>
-
-              {/* <Form.Group controlId="currency">
-              <Form.Label>Seller Paysofter Account ID</Form.Label>
-              <Form.Control
-                // as="select"
-                // value={currency}
-                // onChange={(e) => setCurrency(e.target.value)}
-                placeholder="123456789012"
-                disabled
-              ></Form.Control>
-            </Form.Group> */}
-
-              {/* <Form.Group controlId="seller_name">
-              <Form.Label>Seller Name</Form.Label>
-              <Form.Control
-                // as="select"
-                // value={seller_name}
-                // onChange={(e) => setCurrency(e.target.value)}
-                placeholder="Seller name"
-                disabled
-              ></Form.Control>
-            </Form.Group> */}
-
-              <Form.Group controlId="paymenthMethod">
-                <Form.Label>Payment Method</Form.Label>
-                <Form.Control
-                  disabled
-                  as="select"
-                  value={paymenthMethod}
-                  onChange={(e) => setPaymenthMethod(e.target.value)}
-                >
-                  <option value="Paysofter Promise">Paysofter Promise</option>
-                  <option value="Paysofter Account Fund">
-                    Paysofter Account Fund
-                  </option>
-                  <option value="Debit Card">Debit Card</option>
-                  <option value="Bank">Bank</option>
-                  <option value="Transfer">Transfer</option>
-                  <option value="QR COde">QR COde</option>
-                  <option value="USSD">USSD</option>
-                </Form.Control>
-              </Form.Group>
-
-              <Form.Group controlId="paymentProvider">
-                <Form.Label>Payment Provider</Form.Label>
-                <Form.Control
-                  disabled
-                  as="select"
-                  value={paymentProvider}
-                  onChange={(e) => setPaymentProvider(e.target.value)}
-                >
-                  <option value="Paysofter">Paysofter</option>
-                  
-                  <option value="Mastercard">Mastercard</option>
-                  <option value="Verve">Verve</option>
-                  <option value="Visa">Visa</option>
-                  <option value="GTB">GTB</option>
-                  <option value="Fidelity">Fidelity</option>
-                </Form.Control>
-              </Form.Group>
-
-              <Form.Group controlId="duration">
-                <Form.Label>Settlement Duration</Form.Label>
-                <Form.Control
-                  as="select"
-                  readOnly
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                >
-                  <option value="Within 1 day">Within 1 day</option>
-                  <option value="2 days">Less than 2 days</option>
-                  <option value="3 days">Less than 3 days</option> 
-                  <option value="5 days">Less than 5 days</option> 
-                  <option value="1 week">Less than 1 week</option>
-                  <option value="2 weeks">Less than 2 weeks</option>
-                  <option value="1 month">Less than 1 month</option>
-                </Form.Control>
-              </Form.Group>
-
-              
-
-              <div className="py-3 text-center">
-                <Button
-                  className="w-100 rounded"
-                  type="submit"
-                  variant="primary"
-                  onClick={handleShowPaysofterAccountFundPromise}
-                >
-                  Submit{" "}
-                 
-                </Button>
-              </div>
-            </Form>
-            
-          </Col>
-        </Row>
+          <Button title="Submit" onPress={submitHandler} />
+          <Button
+            title="Proceed to Paysofter Account Fund"
+            onPress={handleShowPaysofterAccountFundPromise}
+          />
+        </View>
       )}
-    </Container>
+    </>
   );
 };
 

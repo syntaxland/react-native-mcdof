@@ -2,94 +2,89 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteUserAccount } from "../../actions/userProfileActions";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import { useHistory } from "react-router-dom";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import Message from "../Message";
 import Loader from "../Loader";
 
-function DeleteAccount() {
+const DeleteAccount = () => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
+  const [password, setPassword] = useState("");
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
-
   const deleteProfile = useSelector((state) => state.deleteProfile);
   const { success, error, loading } = deleteProfile;
 
-  const [password, setPassword] = useState("");
-
-  // const [deleteSuccess, setDeleteSuccess] = useState(false);
-
-  // const userProfile = useSelector((state) => state.userProfile);
-  // const { error: deleteAccountError } = userProfile;
-  // const { error: deleteAccountError, deleteAccountSuccess } = userProfile;
-
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
-        history.push("/");
+      setTimeout(() => {
+        navigation.navigate("Home");
       }, 3000);
-      return () => clearTimeout(timer);
     }
-  }, [success, history]);
+  }, [success, navigation]);
 
   const handleDelete = () => {
     dispatch(deleteUserAccount(password));
-    // setDeleteSuccess(true);
-    // history.push("/");
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center mt-3">
-        <Col md={6}>
-          <h2 className="mb-4">Delete Account</h2>
-          {/* {deleteSuccess && ( 
-            <Message variant="success">
-              Account deleted successfully.
-            </Message>
-          )} */}
+    <View style={styles.container}>
+      <Text style={styles.title}>Delete Account</Text>
+      <View style={styles.form}>
+        {loading && <Loader />}
+        {success && (
+          <Message variant="success">
+            Account deleted successfully. You will be logged out.
+          </Message>
+        )}
+        {error && <Message variant="danger">{deleteProfile.error}</Message>}
 
-          {loading && <Loader />}
-          {success && (
-            <Message variant="success">
-              Account deleted successfully. You will be logged out.
-            </Message>
-          )}
-          {error && <Message variant="danger">{deleteProfile.error}</Message>}
-
-          <Form>
-            <Form.Group>
-              <Form.Label>Email Address</Form.Label>
-              <Form.Control
-                type="email"
-                value={userInfo.email}
-                readOnly
-                className="rounded mt-2"
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password to confirm account deletion"
-                className="rounded mt-2"
-              />
-            </Form.Group>
-            <Button
-              variant="danger"
-              onClick={handleDelete}
-              className="rounded mt-2 text-center w-100"
-            >
-              Delete Account
-            </Button>
-          </Form>
-        </Col>
-      </Row>
-    </Container>
+        <TextInput
+          style={styles.input}
+          value={userInfo.email}
+          editable={false}
+        />
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          placeholder="Enter your password"
+          secureTextEntry={true}
+        />
+        <Button
+          title="Delete Account"
+          onPress={handleDelete}
+          color="#dc3545"
+        />
+      </View>
+    </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  form: {
+    width: "100%",
+  },
+  input: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 16,
+    paddingHorizontal: 10,
+  },
+});
 
 export default DeleteAccount;
