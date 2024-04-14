@@ -1,16 +1,16 @@
 // BankPayment.js
 import React from "react";
+import { View, Text } from "react-native";
 
-function BankPayment() {
+const BankPayment = () => {
   // Bank transfer payment UI elements and logic 
   return (
-    <>
-      <div className="py-2 d-flex justify-content-center">
-        <h2 className="text-center py-2">Bank </h2>
-        <div>Coming soon...</div>
-      </div>
-    </>
+    <View style={{ paddingVertical: 16, justifyContent: "center", alignItems: "center" }}>
+      <Text style={{ fontSize: 24, textAlign: "center", marginBottom: 16 }}>Bank</Text>
+      <Text>Coming soon...</Text>
+    </View>
   );
 }
 
 export default BankPayment;
+

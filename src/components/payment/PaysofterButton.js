@@ -9,7 +9,7 @@ import TransferPayment from "./TransferPayment";
 import PaysofterAccountFund from "./PaysofterAccountFund";
 import PaysofterPromise from "./PaysofterPromise";
 import QrPayment from "./QrPayment";
-import { paysofterStyles as styles } from "./paysofterStyles";
+import { styles } from "./paysofterStyles";
 
 const PaysofterButton = ({
   showPaymentModal,

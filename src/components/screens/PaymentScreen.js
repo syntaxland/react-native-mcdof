@@ -1,30 +1,49 @@
 // PaymentScreen.js
 import React, { useEffect, useState } from "react";
-
 import {
   View,
   Text,
-  TextInput,
-  Button,
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Modal,
+  // Button as RNButton,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import PaystackPayment from "../payment/PaystackPayment";
-import Paysofter from "../payment/Paysofter";
+// import Paysofter from "../payment/Paysofter";
 import { styles } from "../screenStyles";
+
+import axios from 'axios';
+import { API_URL } from "../../config/apiConfig"; 
 
 const PaymentScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const order_id = route.params.id;
 
+  
+
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+   const cart = useSelector((state) => state.cart);
+  const { cartItems } = cart;
+
+  const applyPomoCodeState = useSelector((state) => state.applyPomoCodeState);
+  const { promoDiscount, discountPercentage } = applyPomoCodeState;
+  // console.log(
+  //   "Paystack promoDiscount:",
+  //   promoDiscount,
+  //   "discountPercentage:",
+  //   discountPercentage
+  // );
+
+  // const shipmentSave = JSON.parse(localStorage.getItem("shipmentData")) || [];
+  // console.log("shipmentSave:", shipmentSave);
 
   const [paysofterPublicKey, setPaysofterPublicKey] = useState("");
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
@@ -34,20 +53,6 @@ const PaymentScreen = () => {
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
 
-  useEffect(() => {
-    // Fetch payment details from your API
-    // Adjust the logic according to your API response
-    const fetchPaymentDetails = async () => {
-      // Fetch payment details here using your API endpoint
-    };
-
-    fetchPaymentDetails();
-  }, []);
-
-  const handlePaymentGatewaySelection = (paymentGateway) => {
-    setSelectedPaymentGateway(paymentGateway);
-  };
-
   const handleInfoModalShow = () => {
     setShowInfoModal(true);
   };
@@ -56,90 +61,154 @@ const PaymentScreen = () => {
     setShowInfoModal(false);
   };
 
-  // Define your payment data here based on the selected payment gateway
+  
+  
+   const itemsPrice = cartItems.reduce(
+    (acc, item) => acc + item.qty * item.price,
+    0
+  );
+
+  const shippingPrice = cartItems.length > 0 ? 1000 : 0;
+  const taxPrice = cartItems.reduce(
+    (acc, item) => acc + item.qty * item.price * 0.1,
+    0
+  );
+
+  const totalPrice = itemsPrice + shippingPrice + taxPrice;
+
+  const promoTotalPrice = totalPrice - promoDiscount;
+  // console.log(
+  //   "totalPrice:",
+  //   totalPrice,
+  //   "promoDiscount:",
+  //   promoDiscount,
+  //   "promoTotalPrice:",
+  //   promoTotalPrice
+  // );
+
+  const finalItemsPrice = itemsPrice - promoDiscount;
+  console.log("finalItemsPrice:", finalItemsPrice);
+
+  useEffect(() => {
+    const getPaymentDetails = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}/api/get-payment-details/`,
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.access}`, 
+            },
+          }
+        );
+        setPaysofterPublicKey(response.data.paysofterPublicKey);
+        setPaystackPublicKey(response.data.paystackPublicKey);
+        setReference(response.data.reference);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const fetchData = async () => {
+      await getPaymentDetails();
+    };
+    fetchData();
+  }, [userInfo.access]);
+
+  const handlePaymentGatewaySelection = (paymentGateway) => {
+    setSelectedPaymentGateway(paymentGateway);
+  };
+
   const paymentData = {
     reference,
     order_id,
-    // Add other necessary payment data here
+    totalPrice,
+    taxPrice,
+    userEmail,
+    shippingPrice,
+    itemsPrice,
+    finalItemsPrice,
+    promoDiscount,
+    discountPercentage,
+    promoTotalPrice,
+    // publicKey,
+    paystackPublicKey,
+    paysofterPublicKey,
+    // shipmentSave,
   };
+  console.log("paymentData:", paymentData);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
         <Text style={styles.goBackIcon}>
-          <FontAwesomeIcon
-            // size={24}
-            color="blue"
-            icon={faArrowLeft}
-          />{" "}
-          {/* Go Back */}
-          Previous
+          <FontAwesomeIcon color="blue" icon={faArrowLeft} /> Previous
         </Text>
       </TouchableOpacity>
 
       <ScrollView>
-    <View style={styles.container}>
-      <Text style={styles.title}>Payment Page</Text>
-      {/* Render payment gateway buttons */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => handlePaymentGatewaySelection("paystack")}
-      >
-        <Text style={styles.buttonText}>Pay with Paystack</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => handlePaymentGatewaySelection("paysofter")}
-      >
-        <Text style={styles.buttonText}>Pay with Paysofter</Text>
-      </TouchableOpacity>
-      {/* Render other payment gateway buttons */}
-      {/* Add modals or additional components here */}
-      {selectedPaymentGateway === "paystack" && (
-        <PaystackPayment paymentData={paymentData} />
-      )}
+        <View style={styles.container}>
+          <Text style={styles.title}>Payment Page</Text>
+          {/* Render payment gateway buttons */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handlePaymentGatewaySelection("paystack")}
+          >
+            <Text style={styles.buttonText}>Pay with Paystack</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handlePaymentGatewaySelection("paysofter")}
+          >
+            <Text style={styles.buttonText}>Pay with Paysofter</Text>
+          </TouchableOpacity>
+          {/* Render other payment gateway buttons */}
+          {/* Add modals or additional components here */}
+          {selectedPaymentGateway === "paystack" && (
+            <PaystackPayment paymentData={paymentData} />
+          )}
 
-      {/* {selectedPaymentGateway === "paysofter" && (
-        <Paysofter
-          // paymentData={paymentData}
-          reference={reference}
-          order_id={order_id}
-          userEmail={userEmail}
-          paysofterPublicKey={paysofterPublicKey}
-        />
-      )} */}
-    </View>
-    </ScrollView>
+          {/* {selectedPaymentGateway === "paysofter" && (
+            <Paysofter
+              // paymentData={paymentData}
+              reference={reference}
+              order_id={order_id}
+              userEmail={userEmail}
+              paysofterPublicKey={paysofterPublicKey}
+            />
+          )} */}
+
+          {/* Modal for Paysofter Account Info */}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showInfoModal}
+            onRequestClose={handleInfoModalClose}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Paysofter Account</Text>
+                <Text style={styles.modalText}>
+                  Don't have a Paysofter account? You're just about 3 minutes
+                  away! Sign up for a much softer payment experience.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => handleInfoModalShow()}
+                  style={styles.modalButton}
+                >
+                  {/* <Text style={styles.modalButtonText}>Close</Text> */}
+                  <Text>Show Info Modal</Text>
+
+                  <FontAwesomeIcon color="white" icon={faInfoCircle} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     backgroundColor: "#fff",
-//   },
-//   title: {
-//     fontSize: 20,
-//     fontWeight: "bold",
-//     marginBottom: 20,
-//   },
-//   button: {
-//     backgroundColor: "#007bff",
-//     paddingVertical: 10,
-//     paddingHorizontal: 20,
-//     borderRadius: 5,
-//     marginBottom: 10,
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "bold",
-//   },
-// });
 
 export default PaymentScreen;
 

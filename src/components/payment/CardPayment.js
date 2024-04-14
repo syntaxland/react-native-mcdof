@@ -8,7 +8,7 @@ import { clearCart } from "../../actions/cartActions";
 import {
   createPayment,
   createPaysofterPayment,
-} from "../../actions/paymentActions";
+} from "../../actions/paymentActions"; 
 import Message from "../Message";
 import Loader from "../Loader";
 

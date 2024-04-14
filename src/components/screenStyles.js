@@ -91,4 +91,29 @@ export const styles = StyleSheet.create({
     color: "blue",
     padding: 5,
   },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: "blue",
+    padding: 10,
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
 });

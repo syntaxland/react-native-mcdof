@@ -11,7 +11,7 @@ const PaysofterAccountFund = ({
   history,
   promoTotalPrice,
   paymentData,
-  reference,
+  reference, 
   userEmail,
   publicApiKey,
   duration,

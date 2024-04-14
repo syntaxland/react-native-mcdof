@@ -101,7 +101,7 @@ const PaystackPayment = () => {
         value={reference}
         onChangeText={setReference}
       />
-      <Button title="Charge Card" onPress={handleChargeCard} />
+      <Button title="Pay Now" onPress={handleChargeCard} />
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
       {/* Additional UI elements as needed */}

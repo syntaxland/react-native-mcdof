@@ -11,7 +11,7 @@ const PaysofterAccountFundPromise = ({
   promoTotalPrice,
   paymentData,
   reference,
-  userEmail,
+  userEmail, 
   publicApiKey,
   duration,
   paymenthMethod,
