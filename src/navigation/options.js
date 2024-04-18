@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Text } from "react-native";
+import { TouchableOpacity, Image } from "react-native";
 import styles from "../HeaderStyles";
+import logoImage from "../../assets/logo-mcdof.png";
 
 export const navOptions = (nav) => {
   return {
@@ -16,6 +17,10 @@ export const navOptions = (nav) => {
         onPress={() => nav.toggleDrawer()}
       />
     ),
-    headerLeft: () => <Text style={styles.logo}>Mcdofshop</Text>,
+    headerLeft: () => (
+      <TouchableOpacity onPress={() => nav.navigate("Home")}>
+        <Image source={logoImage} style={styles.logo} /> 
+      </TouchableOpacity>
+    ),
   };
 };

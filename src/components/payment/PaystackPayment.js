@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Button, TextInput } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import Paystack from 'paystack-react-native'; 
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { clearCart } from '../../redux/actions/cartActions';
 import { createPayment } from '../../redux/actions/paymentActions';
 import ApplyPromoCode from '../../ApplyPromoCode';
@@ -14,6 +15,7 @@ import { API_URL } from "../../config/apiConfig";
 
 const PaystackPayment = () => {
   const dispatch = useDispatch();
+    const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;

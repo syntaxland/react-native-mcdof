@@ -24,14 +24,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jondebosco.mcdofshop",
+      "enableProguardInReleaseBuilds": true 
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "extra": {
       "eas": {
-        "projectId": "39d2bff7-18f5-42c5-830e-069da9eaf39b" 
+        "projectId": "39d2bff7-18f5-42c5-830e-069da9eaf39b"
       }
     },
     "owner": "jondebosco"

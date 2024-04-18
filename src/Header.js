@@ -12,9 +12,9 @@ import { useNavigation } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faCartPlus,
-  faSearch,
+  // faSearch,
   faHome,
-  faHand,
+  // faHand,
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "./redux/actions/userActions";
 import { getUserProfile } from "./redux/actions/userProfileActions";
@@ -65,7 +65,7 @@ const Header = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.logo}>
+        {/* <Text style={styles.logo}>
           <FontAwesomeIcon
             icon={faHome}
             size={24}
@@ -73,7 +73,7 @@ const Header = () => {
             style={styles.cartIcon}
           />
           Mcdof Shop{" "}
-        </Text>
+        </Text> */}
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}

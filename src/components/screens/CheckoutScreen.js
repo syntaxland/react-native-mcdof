@@ -34,6 +34,12 @@ const CheckoutScreen = () => {
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login");
+    }
+  }, [userInfo, navigation]);
+
   const [order_id, setOrderId] = useState("");
   const [paymentMethod] = useState("Paystack");
 
@@ -64,12 +70,6 @@ const CheckoutScreen = () => {
   // useEffect(() => {
   //   onRefresh();
   // }, [onRefresh]);
-
-  useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo, navigation]);
 
   useEffect(() => {
     const getOrderId = async () => {
@@ -181,20 +181,24 @@ const CheckoutScreen = () => {
             <Text>Total Amount: NGN {formatAmount(totalPrice)}</Text>
             <Text>Timestamp: {createdAt}</Text>
 
-            <TouchableOpacity
-              style={{
-                backgroundColor: cartItems.length > 0 ? "green" : "gray",
-                padding: 10,
-                borderRadius: 5,
-                marginTop: 10,
-              }}
-              disabled={cartItems.length === 0}
-              onPress={createOrderHandler}
-            >
-              <Text style={{ color: "#fff", textAlign: "center" }}>
-                Continue to Shipment
-              </Text>
-            </TouchableOpacity>
+            <View style={{ marginBottom: 10, padding: 10 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: cartItems.length > 0 ? "green" : "gray",
+                  padding: 10,
+                  borderRadius: 5,
+                  marginTop: 10,
+                }}
+                disabled={cartItems.length === 0}
+                onPress={createOrderHandler}
+              >
+                <Text
+                  style={{ color: "#fff", textAlign: "center", padding: 2 }}
+                >
+                  Continue to Shipment
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>

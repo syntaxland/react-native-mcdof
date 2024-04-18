@@ -12,7 +12,7 @@ import PaymentScreen from "../components/screens/PaymentScreen";
 import { navOptions } from "./options";
 import { useNavigation } from "@react-navigation/native";
 import Dashboard from "../components/profiles/Dashboard";
-import { HomeTabs } from "./taps";
+// import { HomeTabs } from "./taps";
 
 const Stack = createStackNavigator();
 
@@ -21,7 +21,8 @@ export const HomeStack = () => {
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
-      <Stack.Screen name="Home" component={HomeTabs} />
+      {/* <Stack.Screen name="Home" component={HomeTabs} /> */}
+      <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Product Detail" component={ProductDetailScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />

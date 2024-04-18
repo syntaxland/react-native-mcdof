@@ -43,11 +43,17 @@ const LoginScreen = () => {
     if (success) {
       const timer = setTimeout(() => {
         navigation.navigate("Home");
-      }, 3000);
+      }, 1000);
 
       return () => clearTimeout(timer);
     }
   }, [success, userInfo, dispatch, navigation]);
+
+  // useEffect(() => {
+  //   if (userInfo && success) {
+  //     navigation.navigate("Home");
+  //   }
+  // }, [success, userInfo, dispatch, navigation]);
 
   return (
     <SafeAreaView>

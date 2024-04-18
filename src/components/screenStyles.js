@@ -4,6 +4,8 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   safeArea: {
     padding: 8, 
+    paddingVertical: 10,
+    paddingBottom: 10,
   },
   scrollViewContent: {
     flexGrow: 1,
@@ -115,5 +117,11 @@ export const styles = StyleSheet.create({
   modalButtonText: {
     color: "white",
     fontSize: 16,
+  },
+  logo: {
+    width: 100,
+    height: 50,
+    resizeMode: "contain",
+    marginLeft: 10, // Adjust as needed
   },
 });

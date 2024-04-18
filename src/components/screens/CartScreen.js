@@ -20,6 +20,9 @@ const CartScreen = () => {
   const route = useRoute();
   const dispatch = useDispatch();
 
+  const userLogin = useSelector((state) => state.userLogin);
+  const { userInfo } = userLogin;
+
   const { id: productId, qty = 1 } = route.params || {};
 
   useEffect(() => {
@@ -35,7 +38,11 @@ const CartScreen = () => {
   };
 
   const checkoutHandler = () => {
-    navigation.navigate("Checkout");
+    if (userInfo) {
+      navigation.navigate("Checkout");
+    } else {
+      navigation.navigate("Login");
+    }
   };
 
   return (
@@ -75,20 +82,25 @@ const CartScreen = () => {
                   </TouchableOpacity>
                 </View>
               ))}
-              <TouchableOpacity
-                style={{
-                  backgroundColor: cartItems.length > 0 ? "green" : "gray",
-                  padding: 10,
-                  borderRadius: 5,
-                  marginTop: 10,
-                }}
-                disabled={cartItems.length === 0}
-                onPress={checkoutHandler}
-              >
-                <Text style={{ color: "#fff", textAlign: "center" }}>
-                  Proceed To Checkout
-                </Text>
-              </TouchableOpacity>
+
+              <View style={{ marginBottom: 10, padding: 10 }}>  
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: cartItems.length > 0 ? "green" : "gray",
+                    padding: 15,
+                    borderRadius: 5,
+                    marginTop: 10,
+                  }}
+                  disabled={cartItems.length === 0}
+                  onPress={checkoutHandler}
+                >
+                  <Text
+                    style={{ color: "#fff", textAlign: "center", padding: 2 }}
+                  >
+                    Proceed To Checkout
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </>
           )}
         </View>

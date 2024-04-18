@@ -13,12 +13,18 @@ const styles = StyleSheet.create({
     // backgroundColor: "#0f172a",
 
   },
+  // logo: {
+  //   fontSize: 18,
+  //   fontWeight: 'bold',
+  //   color: 'white',
+  //   marginLeft: 5,
+  //   paddingLeft: 5,
+  // },
   logo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-    marginLeft: 5,
-    paddingLeft: 5,
+    width: 80,
+    height: 40,
+    resizeMode: "contain",
+    marginLeft: 10, 
   },
   searchContainer: {
     flexDirection: 'row',
