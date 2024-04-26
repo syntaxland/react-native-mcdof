@@ -46,7 +46,7 @@ function Product({ product }) {
   const { cartItems } = cart;
 
   const [isCart, setIsCart] = useState(
-    cartItems.some((item) => item.product === product._id)
+    cartItems?.some((item) => item.product === product._id)
   );
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -168,7 +168,7 @@ function Product({ product }) {
     navigation.navigate("Product Detail", { id: product._id });
     // navigation.navigate("Product Detail", { productId: product._id });
   };
-  console.log("product id:", product.id);
+  // console.log("product id:", product.id);
 
   function formatCount(viewCount) {
     if (viewCount >= 1000000) {

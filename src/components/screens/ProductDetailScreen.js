@@ -26,7 +26,7 @@ function ProductDetailScreen() {
   const route = useRoute();
 
   const { id } = route.params;
-  console.log("id:", id);
+  // console.log("id:", id);
 
   const [qty, setQty] = useState(1);
   const dispatch = useDispatch();

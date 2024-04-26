@@ -26,7 +26,7 @@ export default function App() {
       <NavigationContainer>
         <MyDrawer />
         <Footer />
-        <StatusBar style="light" />
+        <StatusBar style="auto" />
       </NavigationContainer>
     </Provider>
   );

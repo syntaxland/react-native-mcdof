@@ -62,7 +62,7 @@ const CartScreen = () => {
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.title}>Shopping Cart</Text>
-          {cartItems.length === 0 ? (
+          {cartItems?.length === 0 ? (
             <Text style={styles.error}>Your cart is empty</Text>
           ) : (
             <>
@@ -86,12 +86,12 @@ const CartScreen = () => {
               <View style={{ marginBottom: 10, padding: 10 }}>  
                 <TouchableOpacity
                   style={{
-                    backgroundColor: cartItems.length > 0 ? "green" : "gray",
+                    backgroundColor: cartItems?.length > 0 ? "green" : "gray",
                     padding: 15,
                     borderRadius: 5,
                     marginTop: 10,
                   }}
-                  disabled={cartItems.length === 0}
+                  disabled={cartItems?.length === 0}
                   onPress={checkoutHandler}
                 >
                   <Text

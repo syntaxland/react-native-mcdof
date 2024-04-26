@@ -11,16 +11,19 @@ import ShipmentScreen from "../components/screens/ShipmentScreen";
 import PaymentScreen from "../components/screens/PaymentScreen";
 import { navOptions } from "./options";
 import { useNavigation } from "@react-navigation/native";
-import Dashboard from "../components/profiles/Dashboard";
+import { useSelector } from "react-redux";
+
+// import Dashboard from "../components/profiles/Dashboard";
 // import { HomeTabs } from "./taps";
 
 const Stack = createStackNavigator();
 
 export const HomeStack = () => {
   const navigation = useNavigation();
+  const cartItemsCount = useSelector((state) => state.cart.cartItems.length);
 
   return (
-    <Stack.Navigator screenOptions={() => navOptions(navigation)}>
+    <Stack.Navigator screenOptions={() => navOptions(navigation, cartItemsCount)}>
       {/* <Stack.Screen name="Home" component={HomeTabs} /> */}
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
@@ -38,10 +41,12 @@ export const HomeStack = () => {
 
 export const UserDashboardStack = () => {
   const navigation = useNavigation();
+  const cartItemsCount = useSelector((state) => state.cart.cartItems.length);
+
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Dashboard" component={Dashboard} />
+      {/* <Stack.Screen name="Dashboard" component={Dashboard} /> */}
       {/* <Stack.Screen name="Cart" component={CartScreen} /> */}
      
 

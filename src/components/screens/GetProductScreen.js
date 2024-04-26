@@ -15,10 +15,10 @@ function GetProductScreen() {
   const productList = useSelector((state) => state.productList);
   const { error, loading, products } = productList;
 
-  console.log("product length:", products?.length);
+  // console.log("product length:", products?.length);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const itemsPerPage = 5;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;

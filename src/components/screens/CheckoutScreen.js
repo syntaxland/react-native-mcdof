@@ -88,7 +88,7 @@ const CheckoutScreen = () => {
     getOrderId();
   }, [userInfo.access]);
 
-  const shippingPrice = cartItems.length > 0 ? 1000 : 0;
+  const shippingPrice = cartItems?.length > 0 ? 1000 : 0;
   const taxPrice = cartItems.reduce(
     (acc, item) => acc + item.qty * item.price * 0.03,
     0
@@ -102,7 +102,7 @@ const CheckoutScreen = () => {
   const createdAt = new Date().toISOString();
 
   const createOrderHandler = async () => {
-    const orderItems = cartItems.map((item) => ({
+    const orderItems = cartItems?.map((item) => ({
       product: item.product,
       name: item.name,
       qty: item.qty,
@@ -161,7 +161,7 @@ const CheckoutScreen = () => {
 
           <View style={styles.container}>
             <Text style={styles.title}>Order Summary</Text>
-            {cartItems.map((item) => (
+            {cartItems?.map((item) => (
               <View key={item.product} style={{ marginBottom: 10 }}>
                 <Image
                   source={{ uri: item.image }}
@@ -184,12 +184,12 @@ const CheckoutScreen = () => {
             <View style={{ marginBottom: 10, padding: 10 }}>
               <TouchableOpacity
                 style={{
-                  backgroundColor: cartItems.length > 0 ? "green" : "gray",
+                  backgroundColor: cartItems?.length > 0 ? "green" : "gray",
                   padding: 10,
                   borderRadius: 5,
                   marginTop: 10,
                 }}
-                disabled={cartItems.length === 0}
+                disabled={cartItems?.length === 0}
                 onPress={createOrderHandler}
               >
                 <Text

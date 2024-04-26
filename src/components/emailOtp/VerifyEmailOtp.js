@@ -49,7 +49,7 @@ const VerifyEmailOtp = () => {
       setCountdown(60);
       setShowSuccessMessage(true);
       setTimeout(() => {
-        navigation.navigate("Home");
+        navigation.navigate("Login");
       }, 5000);
     }
   }, [success]);
@@ -106,27 +106,25 @@ const VerifyEmailOtp = () => {
           {resendMessage}
         </Message>
       )}
-      <TextInput
-        style={styles.input}
-        value={otp}
-        onChangeText={setOtp}
-        placeholder="Enter OTP"
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={otp}
+          onChangeText={setOtp}
+          placeholder="Enter OTP"
+        />
+      </View>
       <Button
         title="Verify OTP"
         onPress={handleVerifyEmailOtp}
         disabled={loading || success}
       />
-      {/* <Text>
-        OTP has been sent to your email 
-        {userRegisterData.email} 
-        and expires in
-        30 minutes. It might take a few seconds to deliver.
-      </Text> */}
-      <Text>
+      <Text style={{ textAlign: "center" }}>
         OTP has been sent to your email{" "}
-        {userRegisterData && userRegisterData.email} and expires in 30 minutes.
-        It might take a few seconds to deliver.
+        <Text style={{ fontWeight: "bold" }}>
+          {userRegisterData && userRegisterData.email}
+        </Text>{" "}
+        and expires in 30 minutes. It might take a few seconds to deliver.
       </Text>
       <TouchableOpacity
         onPress={handleResendEmailOtp}

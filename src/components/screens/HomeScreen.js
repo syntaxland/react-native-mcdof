@@ -15,15 +15,14 @@ import {
   useDispatch,
   //  useSelector
 } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
+// import { useNavigation } from "@react-navigation/native";
 import { listProducts } from "../../redux/actions/productAction";
 import GetProductScreen from "./GetProductScreen";
 // import RecommendedProducts from "./RecommendedProducts";
-import Header from "../../Header";
 import { styles } from "../screenStyles";
 
 function HomeScreen() {
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
   const dispatch = useDispatch();
 
   // const userLogin = useSelector((state) => state.userLogin);
@@ -43,6 +42,8 @@ function HomeScreen() {
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
+  console.log("Hey Mcdofshop!")
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -52,7 +53,7 @@ function HomeScreen() {
         }
       >
         <View style={styles.container}>
-          <Header />
+          
 
           <GetProductScreen />
 

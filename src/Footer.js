@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Linking  } from "react-native";
 
 const currentYear = new Date().getFullYear();
 
@@ -9,7 +9,7 @@ function Footer() {
   };
 
   return (
-    <View style={{ backgroundColor: "#000", paddingVertical: 10 }}>
+    <View style={{ backgroundColor: "#6c757d", paddingVertical: 10 }}>
       <View style={{ alignItems: "center" }}>
         <Text style={{ color: "#fff" }}>
           &copy; Mcdofshop, {currentYear}. All rights reserved.

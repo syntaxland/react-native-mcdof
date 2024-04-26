@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
   },
   header: {
     padding: 10,
-    // backgroundColor: "#0f172a",
+    backgroundColor: "#6c757d",
     // paddingHorizontal: 20,
   },
   button: {

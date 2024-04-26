@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faCartPlus,
   // faSearch,
-  faHome,
+  // faHome,
   // faHand,
 } from "@fortawesome/free-solid-svg-icons";
 import { logout } from "./redux/actions/userActions";
@@ -128,8 +128,8 @@ const Header = () => {
                 style={styles.cartIcon}
               />
 
-              {cartItems.length > 0 && (
-                <Text style={styles.cartCount}>{cartItems.length}</Text>
+              {cartItems?.length > 0 && (
+                <Text style={styles.cartCount}>{cartItems?.length}</Text>
               )}
             </View>
           </TouchableOpacity>
