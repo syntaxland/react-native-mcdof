@@ -7,9 +7,9 @@ import {
   DrawerItem,
 } from "@react-navigation/drawer";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { HomeStack,
-   UserDashboardStack
-   } from "./stack";
+import { HomeStack, 
+  // UserDashboardStack
+ } from "./stack";
 
 import { Text, View, StyleSheet } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
@@ -26,7 +26,12 @@ export const MyDrawer = (props) => {
         <Drawer.Navigator
           // initialRouteName="Home"
           screenOptions={{ headerShown: false }}
-          drawerContent={(props) => <CustomDrawerContent {...props} />}
+          // drawerContent={(props) => <CustomDrawerContent {...props} />}
+          drawerContent={(props) => (
+            <View style={{ flex: 1, backgroundColor: "#6c757d" }}>
+              <CustomDrawerContent {...props} />
+            </View>
+          )}
         >
           <Drawer.Screen
             name="HomeStack"
@@ -36,13 +41,13 @@ export const MyDrawer = (props) => {
             }}
           />
 
-          <Drawer.Screen
+          {/* <Drawer.Screen
             name="Dashboard"
             component={UserDashboardStack}
             options={{
-              title: "Dashboard",
+              title: "Dashboard", 
             }}
-          />
+          /> */}
         </Drawer.Navigator>
       </SafeAreaProvider>
     </>
@@ -60,7 +65,7 @@ export const CustomDrawerContent = (props) => {
 
   useEffect(() => {
     const currentHour = new Date().getHours();
-    if (currentHour >= 5 && currentHour < 12) {
+    if (currentHour >= 0 && currentHour < 12) {
       setGreeting("Good morning");
     } else if (currentHour >= 12 && currentHour < 18) {
       setGreeting("Good afternoon");
@@ -87,10 +92,77 @@ export const CustomDrawerContent = (props) => {
       </View>
 
       <DrawerItemList {...props} />
-      <DrawerItem
-        label="Goto Homepage"
-        onPress={() => navigation.navigate("Home")}
-      />
+
+      {userInfo ? (
+        <>
+          <DrawerItem
+            label="Dashboard"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Profile"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Orders"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Purchased Items"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Payments"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Shipments"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Reviews"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Inbox"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Saved Items"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Offers"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Feedback"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Support Tickets"
+            onPress={() => navigation.navigate("Home")}
+          />
+
+          <DrawerItem
+            label="Settings"
+            onPress={() => navigation.navigate("Home")}
+          />
+        </>
+      ) : (
+        <></>
+      )}
 
       <DrawerItem
         label={() => (

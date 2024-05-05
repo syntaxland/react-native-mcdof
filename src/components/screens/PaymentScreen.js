@@ -17,25 +17,24 @@ import PaystackPayment from "../payment/PaystackPayment";
 // import Paysofter from "../payment/Paysofter";
 import { styles } from "../screenStyles";
 
-import axios from 'axios';
-import { API_URL } from "../../config/apiConfig"; 
+import axios from "axios";
+import { API_URL } from "../../config/apiConfig";
 
 const PaymentScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const order_id = route.params.id;
 
-  
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
 
-   const cart = useSelector((state) => state.cart);
+  const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
 
   const applyPomoCodeState = useSelector((state) => state.applyPomoCodeState);
@@ -66,9 +65,7 @@ const PaymentScreen = () => {
     setShowInfoModal(false);
   };
 
-  
-  
-   const itemsPrice = cartItems.reduce(
+  const itemsPrice = cartItems.reduce(
     (acc, item) => acc + item.qty * item.price,
     0
   );
@@ -92,7 +89,7 @@ const PaymentScreen = () => {
   // );
 
   const finalItemsPrice = itemsPrice - promoDiscount;
-  console.log("finalItemsPrice:", finalItemsPrice);
+  // console.log("finalItemsPrice:", finalItemsPrice);
 
   useEffect(() => {
     const getPaymentDetails = async () => {
@@ -101,7 +98,7 @@ const PaymentScreen = () => {
           `${API_URL}/api/get-payment-details/`,
           {
             headers: {
-              Authorization: `Bearer ${userInfo.access}`, 
+              Authorization: `Bearer ${userInfo.access}`,
             },
           }
         );
@@ -160,7 +157,7 @@ const PaymentScreen = () => {
           >
             <Text style={styles.buttonText}>Pay with Paystack</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => handlePaymentGatewaySelection("paysofter")}
@@ -216,4 +213,3 @@ const PaymentScreen = () => {
 };
 
 export default PaymentScreen;
-
