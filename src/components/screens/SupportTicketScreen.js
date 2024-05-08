@@ -1,20 +1,31 @@
 // SupportTicketScreen.js
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { createSupportTicket } from "../../actions/supportActions";
-import Loader from "../Loader";
-import Message from "../Message";
+import { useNavigation } from "@react-navigation/native";
+import { TextInput, Button } from "react-native-paper"; 
+import { Picker } from "@react-native-picker/picker"; 
 
-const SupportTicketScreen = ({ navigation }) => {
+import { createSupportTicket } from "../../redux/actions/supportActions";
+import Loader from "../../Loader";
+import Message from "../../Message";
+
+const SupportTicketScreen = () => {
   const dispatch = useDispatch();
+  const navigation = useNavigation(); 
 
   const [subject, setSubject] = useState("");
-  const [category, setCategory] = useState("support");
+  const [category, setCategory] = useState("support"); // Initialize category state
   const [message, setMessage] = useState("");
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
+
+  useEffect(() => {
+    if (!userInfo) {
+      navigation.navigate("Login");
+    }
+  }, [userInfo]);
 
   const createSupportTicketState = useSelector(
     (state) => state.createSupportTicketState
@@ -32,73 +43,92 @@ const SupportTicketScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    if (!userInfo) {
-      navigation.navigate("Login");
-    }
-  }, [userInfo, navigation]);
-
-  useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         navigation.navigate("Dashboard");
       }, 1000);
-      return () => clearTimeout(timer);
     }
   }, [success, navigation]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create A New Support Ticket</Text>
-      {loading && <Loader />}
-      {error && <Message variant="danger">{error}</Message>}
-      {success && <Message variant="success">Ticket created successfully.</Message>}
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Subject"
-          value={subject}
-          onChangeText={setSubject}
-          maxLength={80}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Message"
-          value={message}
-          onChangeText={setMessage}
-          maxLength={1000}
-          multiline
-        />
-        <Button
-          title="Submit"
-          onPress={submitHandler}
-          disabled={message === "" || subject === "" || loading || success}
-        />
-      </View>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        <View style={styles.innerContainer}>
+          <Text style={styles.title}>Create A New Support Ticket</Text>
+          {loading && <Loader />}
+          {error && <Message variant="danger">{error}</Message>}
+          {success && (
+            <Message variant="success">Ticket created successfully.</Message>
+          )}
+          <Picker
+            selectedValue={category}
+            onValueChange={(itemValue, itemIndex) => setCategory(itemValue)}
+            style={styles.input}
+          >
+            <Picker.Item label="Support" value="support" />
+            <Picker.Item label="Billing" value="billing" />
+            <Picker.Item label="Abuse" value="abuse" />
+            <Picker.Item label="OTP" value="otp" />
+            <Picker.Item label="Payments" value="payments" />
+            <Picker.Item label="Services" value="services" />
+            <Picker.Item label="Credit Points" value="credit_points" />
+            <Picker.Item label="Referrals" value="referrals" />
+            <Picker.Item label="Others" value="others" />
+          </Picker>
+          <TextInput
+            label="Subject"
+            value={subject}
+            onChangeText={(text) => setSubject(text)}
+            mode="outlined"
+            style={styles.input}
+            maxLength={80}
+          />
+          <TextInput
+            label="Message"
+            value={message}
+            onChangeText={(text) => setMessage(text)}
+            mode="outlined"
+            style={styles.input}
+            multiline
+            numberOfLines={4}
+            maxLength={1000}
+          />
+          <Button
+            mode="contained"
+            onPress={submitHandler}
+            disabled={message === "" || subject === "" || loading || success}
+            style={styles.button}
+          >
+            Submit
+          </Button>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
+  },
+  scrollView: {
+    flexGrow: 1,
+  },
+  innerContainer: {
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
-  },
-  form: {
-    width: "100%",
+    textAlign: "center",
+    marginBottom: 20,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 16,
+    marginBottom: 15,
+  },
+  button: {
+    marginTop: 10,
+    borderRadius: 10,
   },
 });
 

@@ -1,182 +1,201 @@
 // UserProfile.js
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   View,
   Text,
-  TouchableOpacity,
+  TextInput,
+  Button,
   ScrollView,
+  StyleSheet,
 } from "react-native";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import { updateUserProfile, updateUserAvatar } from "../../actions/userProfileActions";
-import { sendEmailOtp } from "../../actions/emailOtpActions";
-import { styles } from "../screenStyles";
+import {
+  getUserProfile,
+  updateUserProfile,
+  // updateUserAvatar,
+} from "../../redux/actions/userProfileActions";
+import { sendEmailOtp } from "../../redux/actions/emailOtpActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 import Accordion from "react-native-collapsible/Accordion";
 
-const UserProfile = () => {
+function UserProfile() {
   const dispatch = useDispatch();
-  const navigation = useNavigation();
 
+  // Redux state selectors
   const userProfile = useSelector((state) => state.userProfile);
+  const updateProfile = useSelector((state) => state.updateProfile);
+  const userLogin = useSelector((state) => state.userLogin);
+
+  // Destructure profile, loading, and error from userProfile state
   const { loading: profileLoading, error: profileError, profile } = userProfile;
 
-  const updateProfile = useSelector((state) => state.updateProfile);
+  // Destructure loading, success, and error from updateProfile state
   const { loading, success, error } = updateProfile;
 
-  const userLogin = useSelector((state) => state.userLogin);
+  // Destructure userInfo from userLogin state
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login");
+      // Redirect to login if userInfo is not available
+      // Handle navigation based on your navigation method (e.g., React Navigation)
+      // navigation.navigate('Login');
+    } else {
+      // Fetch user profile data
+      dispatch(getUserProfile());
     }
-  }, [navigation, userInfo]);
-
-  const [successMessage, setSuccessMessage] = useState("");
-
-  const handleAvatarChange = (avatar) => {
-    if (avatar) {
-      const formData = new FormData();
-      formData.append("avatar", avatar);
-      dispatch(updateUserAvatar(formData));
-    }
-  };
+  }, [dispatch, userInfo]);
 
   const [userData, setUserData] = useState({
     first_name: "",
     last_name: "",
     phone_number: "",
+    email: "",
   });
 
   useEffect(() => {
-    if (userInfo) {
+    if (userProfile && userProfile.profile) {
       setUserData({
-        first_name: userInfo.first_name,
-        last_name: userInfo.last_name,
-        phone_number: userInfo.phone_number,
+        first_name: userProfile.profile.first_name,
+        last_name: userProfile.profile.last_name,
+        phone_number: userProfile.profile.phone_number,
+        email: userProfile.profile.email,
+        avatar: userProfile.profile.avatar,
       });
     }
-  }, [userInfo]);
-
-  useEffect(() => {
-    if (success) {
-      setSuccessMessage("Profile updated successfully.");
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
-    }
-  }, [success]);
-
+  }, [userProfile]);
+  // Handle input change
   const handleInputChange = (name, value) => {
     setUserData({ ...userData, [name]: value });
   };
 
+  // Handle update profile
   const handleUpdateProfile = () => {
     dispatch(updateUserProfile(userData));
   };
 
+
+
+  // Handle resend email OTP
   const handleResendEmailOtp = () => {
     dispatch(sendEmailOtp(userInfo.email, userInfo.first_name));
-    navigation.navigate("VerifyEmailOtp");
+    // Navigate to verify email OTP screen
+    // navigation.navigate('VerifyEmailOTP');
   };
 
+  // Handle verify email
   const handleVerifyEmail = () => {
     if (!userInfo.is_verified) {
       handleResendEmailOtp();
     }
   };
 
+  // Define sections for Accordion
   const SECTIONS = [
-    {
-      title: "Bio",
-      content: (
-        <View style={styles.accordionContent}>
-          {!userInfo.is_verified && (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleVerifyEmail}
-            >
-              <Text style={styles.buttonText}>Verify Email</Text>
-            </TouchableOpacity>
-          )}
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Username</Text>
-            <Text style={styles.formText}>{profile.username}</Text>
-          </View>
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>First Name</Text>
-            <TextInput
-              style={styles.formInput}
-              value={userData.first_name}
-              onChangeText={(text) => handleInputChange("first_name", text)}
-            />
-          </View>
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Last Name</Text>
-            <TextInput
-              style={styles.formInput}
-              value={userData.last_name}
-              onChangeText={(text) => handleInputChange("last_name", text)}
-            />
-          </View>
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Email Address</Text>
-            <Text style={styles.formText}>{profile.email}</Text>
-          </View>
-          <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Phone Number</Text>
-            <TextInput
-              style={styles.formInput}
-              value={userData.phone_number}
-              onChangeText={(text) => handleInputChange("phone_number", text)}
-            />
-          </View>
-          <TouchableOpacity
-            style={[styles.button, styles.successButton]}
-            onPress={handleUpdateProfile}
-          >
-            <Text style={styles.buttonText}>Update Profile</Text>
-          </TouchableOpacity>
-        </View>
-      ),
-    },
-    {
-      title: "Update Avatar",
-      content: (
-        <View style={styles.accordionContent}>
-          <Text style={styles.formLabel}>Avatar</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              // Handle avatar change
-            }}
-          >
-            <Text style={styles.buttonText}>Choose Avatar</Text>
-          </TouchableOpacity>
-        </View>
-      ),
-    },
+    { title: "Bio", content: "Bio content here" },
+    // Add more sections as needed
   ];
 
+  // Render Accordion content
+  const renderContent = (section) => {
+    return (
+      <View>
+        {/* Render content for each section */}
+        <Text>{section.content}</Text>
+      </View>
+    );
+  };
+
+  const renderHeader = (section) => {
+    return (
+      <View>
+        <Text>{section.title}</Text>
+      </View>
+    );
+  };
+
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <ScrollView style={{ flex: 1, padding: 20 }}>
+      <View>
         <Text style={styles.title}>Profile</Text>
+        {profileLoading && <Loader>Loading...</Loader>}
+        {profileError && <Message>Error: {profileError}</Message>}
+        {success && <Message>Profile updated successfully.</Message>}
+        {error && <Message>Error: {error}</Message>}
 
-        {loading && <Loader />}
-        {profileLoading && <Loader />}
+        {/* <Accordion
+          sections={SECTIONS}
+          renderHeader={renderHeader}
+          renderContent={renderContent}
+        /> */}
 
-        {successMessage !== "" && (
-          <Text style={styles.successMessage}>{successMessage}</Text>
+        {/* Render form inputs */}
+        <TextInput
+          placeholder="First Name"
+          value={userData.first_name}
+          onChangeText={(text) => handleInputChange("first_name", text)}
+        />
+        <TextInput
+          placeholder="Last Name"
+          value={userData.last_name}
+          onChangeText={(text) => handleInputChange("last_name", text)}
+        />
+        <TextInput
+          placeholder="Email"
+          value={userData.email}
+          onChangeText={(text) => handleInputChange("email", text)}
+        />
+
+        <TextInput
+          placeholder="Phone Number"
+          value={userData.phone_number}
+          onChangeText={(text) => handleInputChange("phone_number", text)}
+        />
+
+        <Button title="Update Profile" onPress={handleUpdateProfile} />
+
+        {!userInfo.is_verified && (
+          <Button title="Verify Email" onPress={handleVerifyEmail} />
         )}
-
-        {error && <Message variant="danger">{error}</Message>}
-        {profileError && <Message variant="danger">{error}</Message>}
-
-        <Accordion sections={SECTIONS} />
       </View>
     </ScrollView>
   );
-};
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 10,
+    textAlign: "center",
+  },
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 20,
+  },
+  headerCell: {
+    width: 150,
+    marginLeft: 20,
+    borderRightWidth: 1,
+    borderColor: "black",
+  },
+  cell: {
+    width: 150,
+    marginLeft: 10,
+  },
+  snHeaderCell: {
+    width: 50,
+    borderRightWidth: 1,
+    borderColor: "black",
+  },
+  snCell: {
+    width: 50,
+  },
+});
 
 export default UserProfile;

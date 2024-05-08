@@ -1,5 +1,8 @@
 // stack.js
 import { createStackNavigator } from "@react-navigation/stack";
+import { navOptions } from "./options";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import HomeScreen from "../components/screens/HomeScreen";
 import CartScreen from "../components/screens/CartScreen";
 import LoginScreen from "../components/screens/LoginScreen";
@@ -9,12 +12,27 @@ import VerifyEmailOtp from "../components/emailOtp/VerifyEmailOtp";
 import CheckoutScreen from "../components/screens/CheckoutScreen";
 import ShipmentScreen from "../components/screens/ShipmentScreen";
 import PaymentScreen from "../components/screens/PaymentScreen";
-import { navOptions } from "./options";
-import { useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+import FeedbackScreen from "../components/screens/FeedbackScreen";
+import SupportTicketScreen from "../components/screens/SupportTicketScreen";
+// import FeedbackScreen from "../components/screens/FeedbackScreen";
+// import FeedbackScreen from "../components/screens/FeedbackScreen";
+// import FeedbackScreen from "../components/screens/FeedbackScreen";
+import Orders from "../components/profiles/Orders"; 
+import Payments from "../components/profiles/Payments"; 
+import OrderItem from "../components/profiles/OrderItem"; 
+import SavedItems from "../components/profiles/SavedItems"; 
+import OrderShipment from "../components/profiles/OrderShipment"; 
+import Reviews from "../components/profiles/Reviews"; 
+import Offers from "../components/profiles/Offers"; 
+import Feedback from "../components/profiles/Feedback"; 
+import SupportTicket from "../components/profiles/SupportTicket"; 
+import SupportTicketDetails from "../components/profiles/SupportTicketDetails"; 
+import Dashboard from "../components/profiles/Dashboard";
+import MessageInbox from "../components/profiles/MessageInbox";
+import UserProfile from "../components/profiles/UserProfile";
+import Settings from "../components/profiles/Settings";
 
-// import Dashboard from "../components/profiles/Dashboard";
-// import { HomeTabs } from "./taps";
+
 
 const Stack = createStackNavigator();
 
@@ -24,7 +42,6 @@ export const HomeStack = () => {
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation, cartItemsCount)}>
-      {/* <Stack.Screen name="Home" component={HomeTabs} /> */}
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Product Detail" component={ProductDetailScreen} />
@@ -34,7 +51,23 @@ export const HomeStack = () => {
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Shipment" component={ShipmentScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
+      <Stack.Screen name="FeedbackScreen" component={FeedbackScreen} />
+      <Stack.Screen name="Create Ticket" component={SupportTicketScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfile} />
 
+      <Stack.Screen name="Dashboard" component={Dashboard} />
+      <Stack.Screen name="Orders" component={Orders} />
+      <Stack.Screen name="Payments" component={Payments} />
+      <Stack.Screen name="Purchased Items" component={OrderItem} />
+      <Stack.Screen name="Saved Items" component={SavedItems} />
+      <Stack.Screen name="Shipments" component={OrderShipment} />
+      <Stack.Screen name="Reviews" component={Reviews} />
+      <Stack.Screen name="Offers" component={Offers} />
+      <Stack.Screen name="Feedback" component={Feedback} />
+      <Stack.Screen name="Support Ticket" component={SupportTicket} />
+      <Stack.Screen name="Ticket Details" component={SupportTicketDetails} />
+      <Stack.Screen name="MessageInbox" component={MessageInbox} />
+      <Stack.Screen name="Settings" component={Settings} />
     </Stack.Navigator>
   );
 };

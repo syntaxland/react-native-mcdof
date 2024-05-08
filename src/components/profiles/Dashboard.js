@@ -1,41 +1,15 @@
 // Dashboard.js
-import React, {
-  useEffect,
-  // useState
-} from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  // Modal,
-  // TouchableOpacity,
-} from "react-native";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect } from "react";
+import { View, Text, ScrollView, SafeAreaView, Dimensions, StyleSheet } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { LineChart, PieChart } from "react-native-chart-kit";
-import { getCreditPointBalance } from "../../actions/creditPointActions";
-import { listPayments } from "../../actions/paymentActions";
-import { getOrders } from "../../actions/orderActions";
-import Loader from "../Loader";
-import Message from "../Message";
-// import SellCreditPoint from "../CreditPoint/SellCreditPoint";
-// import SelectCurrency from "../CreditPoint/SelectCurrency";
+import { listPayments } from "../../redux/actions/paymentActions";
+import { getOrders } from "../../redux/actions/orderActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
-const Dashboard = () => {
+function Dashboard() {
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getCreditPointBalance());
-    dispatch(listPayments());
-    dispatch(getOrders());
-  }, [dispatch]);
-
-  const creditPointBal = useSelector((state) => state.creditPointBal);
-  const {
-    loading,
-    error,
-    // creditPointBalance
-  } = creditPointBal;
 
   const paymentList = useSelector((state) => state.paymentList);
   const {
@@ -47,295 +21,311 @@ const Dashboard = () => {
   const orderList = useSelector((state) => state.orderList);
   const { loading: orderLoading, error: orderError, orders } = orderList;
 
-  // const [buyCreditPointModal, setBuyCreditPointModal] = useState(false);
-  // const handleBuyCreditPointClose = () => {
-  //   setBuyCreditPointModal(false);
-  // };
-
-  // const [sellCreditPointModal, setSellCreditPointModal] = useState(false);
-  // const handleSellCreditPointClose = () => {
-  //   setSellCreditPointModal(false);
-  // };
+  useEffect(() => {
+    dispatch(listPayments());
+    dispatch(getOrders());
+  }, [dispatch]);
 
   const getTotalPayment = () => {
     let totalPayment = 0;
-    payments.forEach((payment) => {
+    payments?.forEach((payment) => {
       totalPayment += parseFloat(payment.amount);
     });
     return totalPayment;
   };
 
-  const paidOrderRateData = {
-    labels: [
-      `Paid Orders (${(
-        (orders?.filter((order) => order.isPaid)?.length / orders?.length) *
-        100
-      ).toFixed(1)}%)`,
-      `Unpaid Orders (${(
-        (orders?.filter((order) => !order.isPaid)?.length / orders?.length) *
-        100
-      ).toFixed(1)}%)`,
-    ],
+  const screenWidth = Dimensions.get("window").width;
+
+  const lineGraphData = payments
+    ? {
+        labels: payments?.map((payment) =>
+          new Date(payment.created_at).toLocaleString()
+        ),
+        datasets: [
+          {
+            data: payments?.map((payment) => parseFloat(payment.amount)),
+          },
+        ],
+      }
+    : null;
+
+  const paidOrderRateData = orders
+    ? [
+        {
+          name: `Paid Orders (${(
+            (orders.filter((order) => order.isPaid).length / orders.length) *
+            100
+          ).toFixed(1)}%)`,
+          population: orders.filter((order) => order.isPaid).length,
+          color: "#1F77B4",
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        },
+        {
+          name: `Unpaid Orders (${(
+            (orders.filter((order) => !order.isPaid).length / orders.length) *
+            100
+          ).toFixed(1)}%)`,
+          population: orders.filter((order) => !order.isPaid).length,
+          color: "#FF6384",
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        },
+      ]
+    : null;
+
+  const unfulfilledOrderRateData = orders
+    ? [
+        {
+          name: `Delivered Orders (${(
+            (orders.filter((order) => order.is_delivered).length /
+              orders.length) *
+            100
+          ).toFixed(1)}%)`,
+          population: orders.filter((order) => order.is_delivered).length,
+          color: "#008000",
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        },
+        {
+          name: `Undelivered Orders (${(
+            (orders.filter((order) => !order.is_delivered).length /
+              orders.length) *
+            100
+          ).toFixed(1)}%)`,
+          population: orders.filter((order) => !order.is_delivered).length,
+          color: "#FFA500",
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        },
+      ]
+    : null;
+
+  // const lineGraphData = {
+  //   labels: payments?.map((payment) =>
+  //     new Date(payment.created_at).toLocaleString()
+  //   ),
+  //   datasets: [
+  //     {
+  //       data: payments?.map((payment) => parseFloat(payment.amount)),
+  //     },
+  //   ],
+  // };
+
+  // const paidOrderRateData = [
+  //   {
+  //     name: `Paid Orders (${(
+  //       (orders?.filter((order) => order.isPaid).length / orders?.length) *
+  //       100
+  //     ).toFixed(1)}%)`,
+  //     population: orders?.filter((order) => order.isPaid).length,
+  //     color: "#1F77B4",
+  //     legendFontColor: "#7F7F7F",
+  //     legendFontSize: 15,
+  //   },
+  //   {
+  //     name: `Unpaid Orders (${(
+  //       (orders?.filter((order) => !order.isPaid).length / orders?.length) *
+  //       100
+  //     ).toFixed(1)}%)`,
+  //     population: orders?.filter((order) => !order.isPaid).length,
+  //     color: "#FF6384",
+  //     legendFontColor: "#7F7F7F",
+  //     legendFontSize: 15,
+  //   },
+  // ];
+
+  // const unfulfilledOrderRateData = [
+  //   {
+  //     name: `Delivered Orders (${(
+  //       (orders?.filter((order) => order.is_delivered).length /
+  //         orders?.length) *
+  //       100
+  //     ).toFixed(1)}%)`,
+  //     population: orders?.filter((order) => order.is_delivered).length,
+  //     color: "#008000",
+  //     legendFontColor: "#7F7F7F",
+  //     legendFontSize: 15,
+  //   },
+  //   {
+  //     name: `Undelivered Orders (${(
+  //       (orders?.filter((order) => !order.is_delivered).length /
+  //         orders?.length) *
+  //       100
+  //     ).toFixed(1)}%)`,
+  //     population: orders?.filter((order) => !order.is_delivered).length,
+  //     color: "#FFA500",
+  //     legendFontColor: "#7F7F7F",
+  //     legendFontSize: 15,
+  //   },
+  // ];
+
+  const data = {
+    labels: ["January", "February", "March", "April", "May", "June"],
     datasets: [
       {
-        data: [
-          orders?.filter((order) => order.isPaid)?.length,
-          orders?.filter((order) => !order.isPaid)?.length,
-        ],
-        backgroundColor: ["#1F77B4", "#FF6384"],
+        data: [20, 45, 28, 80, 99, 43],
+        color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
+        strokeWidth: 2, // optional
       },
     ],
+    legend: ["Rainy Days"], // optional
   };
 
-  const unfulfilledOrderRateData = {
-    labels: [
-      `Delivered Orders (${(
-        (orders?.filter((order) => order.is_delivered)?.length /
-          orders.length) *
-        100
-      ).toFixed(1)}%)`,
-      `Undelivered Orders (${(
-        (orders?.filter((order) => !order.is_delivered)?.length /
-          orders?.length) *
-        100
-      ).toFixed(1)}%)`,
-    ],
-    datasets: [
-      {
-        data: [
-          orders?.filter((order) => order.is_delivered)?.length,
-          orders?.filter((order) => !order.is_delivered)?.length,
-        ],
-        backgroundColor: ["#008000", "#FFA500"],
-      },
-    ],
+  const chartConfig = {
+    backgroundGradientFrom: "#1E2923",
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: "#08130D",
+    backgroundGradientToOpacity: 0.5,
+    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    strokeWidth: 2, // optional, default 3
+    barPercentage: 0.5,
+    useShadowColorFromDataset: false, // optional
   };
 
-  const pieChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-  };
+  const pieChartData = [
+    {
+      name: "Seoul",
+      population: 21500000,
+      color: "rgba(131, 167, 234, 1)",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15,
+    },
+    {
+      name: "Toronto",
+      population: 2800000,
+      color: "#F00",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15,
+    },
+    {
+      name: "Beijing",
+      population: 527612,
+      color: "red",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15,
+    },
+    {
+      name: "New York",
+      population: 8538000,
+      color: "#ffffff",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15,
+    },
+    {
+      name: "Moscow",
+      population: 11920000,
+      color: "rgb(0, 0, 255)",
+      legendFontColor: "#7F7F7F",
+      legendFontSize: 15,
+    },
+  ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {loading || paymentLoading || orderLoading ? (
-        <Loader />
-      ) : error || paymentError || orderError ? (
-        <Message variant="danger">
-          {error || paymentError || orderError}
-        </Message>
-      ) : (
-        <View style={styles.content}>
-          <View style={styles.barChartContainer}>
-            <Text style={styles.heading}>Total Payment</Text>
-            <View style={styles.barContainer}>
-              <View
-                style={{
-                  width: `${(getTotalPayment() / 100) * 200}px`,
-                  backgroundColor: "#1E90FF",
-                  height: 20,
-                  borderRadius: 10,
-                }}
-              ></View>
-            </View>
-            <Text>
-              <Text style={styles.icon}>💵</Text> NGN{" "}
-              {getTotalPayment().toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </Text>
-          </View>
-          <View style={styles.lineGraphContainer}>
-            <Text style={styles.heading}>Payments</Text>
-            <LineChart
-              data={{
-                labels: payments.map((payment) =>
-                  new Date(payment.created_at).toLocaleString()
-                ),
-                datasets: [
-                  {
-                    data: payments.map((payment) => payment.amount),
-                  },
-                ],
-              }}
-              width={300}
-              height={200}
-              yAxisLabel="NGN"
-              chartConfig={{
-                backgroundGradientFrom: "#fff",
-                backgroundGradientTo: "#fff",
-                decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
-              }}
-            />
-          </View>
-          <View style={styles.ordersContainer}>
-            <Text style={styles.heading}>Orders</Text>
-            <View style={styles.pieChartContainer}>
-              <Text style={styles.subHeading}>Paid Order Rate</Text>
-              <PieChart
-                data={[
-                  {
-                    name: "Paid Orders",
-                    population: orders?.filter((order) => order.isPaid)?.length,
-                    color: "#1F77B4",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15,
-                  },
-                  {
-                    name: "Unpaid Orders",
-                    population: orders?.filter((order) => !order.isPaid)
-                      ?.length,
-                    color: "#FF6384",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15,
-                  },
-                ]}
-                width={300}
-                height={200}
-                chartConfig={{
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-              />
-            </View>
-            <View style={styles.pieChartContainer}>
-              <Text style={styles.subHeading}>Order Fulfilment Rate</Text>
-              <PieChart
-                data={[
-                  {
-                    name: "Delivered Orders",
-                    population: orders?.filter((order) => order.is_delivered)
-                      ?.length,
-                    color: "#008000",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15,
-                  },
-                  {
-                    name: "Undelivered Orders",
-                    population: orders?.filter((order) => !order.is_delivered)
-                      ?.length,
-                    color: "#FFA500",
-                    legendFontColor: "#7F7F7F",
-                    legendFontSize: 15,
-                  },
-                ]}
-                width={300}
-                height={200}
-                chartConfig={{
-                  backgroundGradientFrom: "#fff",
-                  backgroundGradientTo: "#fff",
-                  color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="15"
-              />
-            </View>
-          </View>
+    <SafeAreaView style={{ flex: 1, padding: 20 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={{ padding: 10 }}>
+          {paymentLoading || orderLoading ? (
+            <Loader />
+          ) : paymentError || orderError ? (
+            <Message variant="danger">{paymentError || orderError}</Message>
+          ) : (
+            <>
+              <View>
+                <Text>Total Payment</Text>
+                <Text>NGN {getTotalPayment().toFixed(2)}</Text>
+              </View>
+              <View>
+                <Text>Payments</Text>
+                <LineChart
+                  data={data}
+                  width={screenWidth}
+                  height={220}
+                  chartConfig={chartConfig}
+                />
+                {/* <LineChart
+                  // data={lineGraphData}
+                  // width={screenWidth}
+                  height={220}
+                  yAxisSuffix="NGN "
+                  chartConfig={{
+                    backgroundGradientFrom: "#1E2923",
+                    backgroundGradientFromOpacity: 0,
+                    backgroundGradientTo: "#08130D",
+                    backgroundGradientToOpacity: 0.5,
+                    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+                    strokeWidth: 2,
+                    barPercentage: 0.5,
+                    useShadowColorFromDataset: false,
+                    decimalPlaces: 2,
+                  }}
+                  bezier
+                  style={{
+                    marginVertical: 8,
+                    borderRadius: 16,
+                  }}
+                /> */}
+              </View>
+              <View>
+                <Text>Orders</Text>
+                <PieChart
+                  data={pieChartData}
+                  width={screenWidth}
+                  height={220}
+                  chartConfig={chartConfig}
+                  accessor={"population"}
+                  backgroundColor={"transparent"}
+                  paddingLeft={"15"}
+                  center={[10, 50]}
+                  absolute
+                />
+                {/* <PieChart
+                  // data={paidOrderRateData}
+                  // width={screenWidth}
+                  height={220}
+                  chartConfig={{
+                    backgroundGradientFrom: "#1E2923",
+                    backgroundGradientFromOpacity: 0,
+                    backgroundGradientTo: "#08130D",
+                    backgroundGradientToOpacity: 0.5,
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    strokeWidth: 2,
+                    barPercentage: 0.5,
+                    useShadowColorFromDataset: false,
+                    decimalPlaces: 2,
+                  }}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="15"
+                  absolute
+                />
+                <PieChart
+                  // data={unfulfilledOrderRateData}
+                  // width={screenWidth}
+                  height={220}
+                  chartConfig={{
+                    backgroundGradientFrom: "#1E2923",
+                    backgroundGradientFromOpacity: 0,
+                    backgroundGradientTo: "#08130D",
+                    backgroundGradientToOpacity: 0.5,
+                    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                    strokeWidth: 2,
+                    barPercentage: 0.5,
+                    useShadowColorFromDataset: false,
+                    decimalPlaces: 2,
+                  }}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="15"
+                  absolute
+                /> */}
+              </View>
+            </>
+          )}
         </View>
-      )}
-
-      {/* <Modal visible={buyCreditPointModal} animationType="slide">
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Buy Credit Point</Text>
-          <TouchableOpacity
-            style={styles.modalCloseButton}
-            onPress={handleBuyCreditPointClose}
-          >
-            <Text style={styles.modalCloseButtonText}>Close</Text>
-          </TouchableOpacity>
-          {buyCreditPointModal && <SelectCurrency />}
-        </View>
-      </Modal>
-
-      <Modal visible={sellCreditPointModal} animationType="slide">
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Sell/Share Credit Point</Text>
-          <TouchableOpacity
-            style={styles.modalCloseButton}
-            onPress={handleSellCreditPointClose}
-          >
-            <Text style={styles.modalCloseButtonText}>Close</Text>
-          </TouchableOpacity>
-          {sellCreditPointModal && <SellCreditPoint />}
-        </View>
-      </Modal> */}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
-  },
-  content: {
-    alignItems: "center",
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  barChartContainer: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  barContainer: {
-    width: 200,
-    height: 20,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  lineGraphContainer: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  ordersContainer: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  subHeading: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  modalContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  modalCloseButton: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-  },
-  modalCloseButtonText: {
-    fontSize: 16,
-    color: "#1E90FF",
-  },
-  pieChartContainer: {
-    marginBottom: 20,
-  },
-  icon: {
-    fontSize: 16,
-  },
-});
+}
 
 export default Dashboard;

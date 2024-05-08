@@ -60,7 +60,7 @@ function GetProductScreen() {
                 totalItems={totalItems}
                 currentPage={currentPage}
                 paginate={paginate}
-              />
+              /> 
             </>
           )}
         </View>

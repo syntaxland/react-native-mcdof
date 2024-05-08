@@ -97,67 +97,67 @@ export const CustomDrawerContent = (props) => {
         <>
           <DrawerItem
             label="Dashboard"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Dashboard")}
           />
 
           <DrawerItem
             label="Profile"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("UserProfile")}
           />
 
           <DrawerItem
             label="Orders"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Orders")}
           />
 
           <DrawerItem
             label="Purchased Items"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Purchased Items")}
           />
 
           <DrawerItem
             label="Payments"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Payments")}
           />
 
           <DrawerItem
             label="Shipments"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Shipments")}
           />
 
           <DrawerItem
             label="Reviews"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Reviews")}
           />
 
           <DrawerItem
             label="Inbox"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("MessageInbox")}
           />
 
           <DrawerItem
             label="Saved Items"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Saved Items")}
           />
 
           <DrawerItem
             label="Offers"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Offers")}
           />
 
           <DrawerItem
             label="Feedback"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Feedback")}
           />
 
           <DrawerItem
             label="Support Tickets"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Support Ticket")}
           />
 
           <DrawerItem
             label="Settings"
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => navigation.navigate("Settings")}
           />
         </>
       ) : (

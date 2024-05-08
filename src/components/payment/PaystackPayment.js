@@ -1,11 +1,11 @@
 // PaystackPayment.js
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, SafeAreaView } from "react-native";
+import { View, ScrollView, SafeAreaView, Button, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { clearCart } from "../../redux/actions/cartActions";
 import { createPayment } from "../../redux/actions/paymentActions";
-// import ApplyPromoCode from "../../ApplyPromoCode";
+import ApplyPromoCode from "../../ApplyPromoCode";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import { Paystack } from "react-native-paystack-webview";
@@ -29,10 +29,12 @@ const PaystackPayment = ({ paymentData }) => {
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
   const [reference, setReference] = useState("");
   const userEmail = userInfo.email;
+  const createdAt = new Date().toISOString();
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
 
   useEffect(() => {
     const getPaymentDetails = async () => {
@@ -58,18 +60,6 @@ const PaystackPayment = ({ paymentData }) => {
   const handlePaymentSuccess = async (response) => {
     setLoading(true);
     try {
-      // const { data } = await axios.post(
-      //   `${API_URL}/api/payments/`,
-      //   {
-      //     ...paymentData,
-      //     transactionRef: response.transactionRef,
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${userInfo.access}`,
-      //     },
-      //   }
-      // );
       dispatch(createPayment(paymentData));
       dispatch(clearCart());
       setSuccess(true);
@@ -86,28 +76,56 @@ const PaystackPayment = ({ paymentData }) => {
     setLoading(false);
   };
 
+  const initiatePayment = () => {
+    // setLoading(true);
+    setPaymentInitiated(true);
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView>
-        <View style={styles.container}>
-          {loading && <Loader />}
-          {error && <Message variant="danger">{error}</Message>}
-          {success && <Message variant="success">Payment successful!</Message>}
-          <Paystack
-            paystackKey={paystackPublicKey}
-            amount={paymentData.totalPrice}
-            billingEmail={userEmail}
-            billingMobile={paymentData.billingMobile}
-            reference={reference}
-            activityIndicatorColor="green"
-            onCancel={() => setLoading(false)}
-            onSuccess={handlePaymentSuccess}
-            onError={handlePaymentError}
-            autoStart={true}
+    <View style={styles.container}>
+      {loading && <Loader />}
+      {error && <Message variant="danger">{error}</Message>}
+      {success && <Message variant="success">Payment successful!</Message>}
+      <View>
+        <Text>Order ID: {paymentData.order_id}</Text>
+        <Text>Shipping Cost: NGN {paymentData.shippingPrice}</Text>
+        <Text>Tax: NGN {paymentData.taxPrice}</Text>
+        <Text>Total Amount: NGN {paymentData.totalPrice}</Text>
+        <Text>Promo Discount: NGN {paymentData.promoDiscount}</Text>
+        <Text>Final Total Amount: NGN {paymentData.finalTotalPrice}</Text>
+        <Text>Timestamp: {createdAt}</Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <ApplyPromoCode order_id={paymentData.order_id} />
+      </View>
+      <View style={styles.buttonContainer}>
+        {!paymentInitiated && (
+          <Button
+            style={styles.button}
+            title="Pay Now"
+            onPress={initiatePayment}
           />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        )}
+
+        {paymentInitiated && (
+          <>
+            <Paystack
+              paystackKey={paystackPublicKey}
+              amount={paymentData.totalPrice}
+              billingEmail={userEmail}
+              billingMobile={paymentData.billingMobile}
+              reference={reference}
+              activityIndicatorColor="green"
+              onCancel={() => setPaymentInitiated(false)}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              autoStart={true}
+            />
+          </>
+        )}
+      </View>
+    </View>
   );
 };
 

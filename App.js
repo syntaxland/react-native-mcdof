@@ -39,7 +39,8 @@ export default function App() {
       <NavigationContainer>
         <MyDrawer />
         <Footer />
-        <StatusBar style="auto" />
+        {/* <StatusBar style="auto" /> */}
+        <StatusBar style="light" translucent={true} hidden={false} />
       </NavigationContainer>
     </Provider>
   );

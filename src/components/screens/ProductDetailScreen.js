@@ -8,7 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { Picker } from "@react-native-picker/picker"; 
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";

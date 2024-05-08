@@ -1,54 +1,61 @@
 // Feedback.js
 import React, { useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Button, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "@react-navigation/native";
-import { listFeedbacks } from "../../actions/feedbackActions";
+import { listFeedbacks } from "../../redux/actions/feedbackActions";
 
-const FeedbackScreen = () => {
+function Feedback() {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const feedbackList = useSelector((state) => state.feedbackList);
   const { feedbacks } = feedbackList;
 
   useEffect(() => {
     dispatch(listFeedbacks());
-  }, [dispatch]);
+  }, []);
 
   const handleSendFeedback = () => {
-    history.push("/feedback");
+    navigation.navigate("FeedbackScreen");
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Would you like to send us feedback?</Text>
-        <Button
-          title="Send Feedback"
-          onPress={handleSendFeedback}
-          color="#007bff"
-        />
+      <View style={styles.innerContainer}>
+        <Text style={styles.text}>Would you want to send us a feedback?</Text>
+        <TouchableOpacity onPress={handleSendFeedback} style={styles.button}>
+          <Text style={styles.buttonText}>Send Feedback</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
   },
-  content: {
+  innerContainer: {
     alignItems: "center",
   },
-  title: {
-    fontSize: 20,
-    marginBottom: 16,
+  text: {
+    marginBottom: 20,
+    fontSize: 16,
     textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
 
-export default FeedbackScreen;
+export default Feedback;

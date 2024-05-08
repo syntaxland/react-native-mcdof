@@ -1,11 +1,19 @@
 // MessageInbox.js
-import React, { useEffect, useState } from "react";
-import { View, Text, Button, FlatList } from "react-native";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMessages } from "../../actions/messagingActions";
-import Message from "../Message";
-import Loader from "../Loader";
-import DOMPurify from "dompurify";
+import {
+  View,
+  Text,
+  Button,
+  ScrollView,
+  StyleSheet,
+  SafeAreaView,
+  RefreshControl,
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { getMessages } from "../../redux/actions/messagingActions";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
 const MessageInbox = () => {
   const dispatch = useDispatch();
@@ -16,102 +24,153 @@ const MessageInbox = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = messages.slice(indexOfFirstItem, indexOfLastItem);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(messages.length / itemsPerPage); i++) {
+    pageNumbers.push(i);
+  }
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const wait = (timeout) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, timeout);
+    });
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    dispatch(getMessages());
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+
   useEffect(() => {
     dispatch(getMessages());
   }, [dispatch]);
 
-  const renderItem = ({ item }) => (
-    <View>
-      <Text style={styles.subject}>{item.subject}</Text>
-      <Text style={styles.sender}>{item.sender.username}</Text>
-      <Text style={styles.timestamp}>
-        {new Date(item.timestamp).toLocaleString()}
-      </Text>
-      <Text style={styles.message}>
-        {item.message.split(" ").length > 10
-          ? item.message.split(" ").slice(0, 10).join(" ") + " ..."
-          : item.message}
-      </Text>
-      {item.message.split(" ").length > 10 && (
-        <Button
-          title="Read More"
-          onPress={() => expandMessage(item.id)}
-          color="#007bff"
-        />
-      )}
-    </View>
-  );
+  const [expandedMessages, setExpandedMessages] = useState([]);
+
+  const expandMessage = (messageId) => {
+    setExpandedMessages((prevExpanded) => [...prevExpanded, messageId]);
+  };
 
   return (
-    <View>
-      <Text style={styles.title}>Message Inbox</Text>
-      {loadingError && <Message variant="danger">{loadingError}</Message>}
-      {loading ? (
-        <Loader />
-      ) : (
-        <>
-          <FlatList
-            data={messages}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-          />
-          {/* Pagination buttons */}
-          <View style={styles.pagination}>
-            <Button
-              title="Previous"
-              onPress={() => setCurrentPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              color="#007bff"
-            />
-            <Text style={styles.pageNumber}>{currentPage}</Text>
-            <Button
-              title="Next"
-              onPress={() => setCurrentPage(currentPage + 1)}
-              disabled={
-                currentPage * itemsPerPage >= messages.length || loading
-              }
-              color="#007bff"
-            />
-          </View>
-        </>
-      )}
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>Message Inbox</Text>
+          {loadingError && <Message variant="danger">{loadingError}</Message>}
+          {loading ? (
+            <Loader />
+          ) : (
+            <ScrollView>
+              {currentItems.map((message) => (
+                <View key={message.id} style={{ marginVertical: 10 }}>
+                  <Text style={{ fontWeight: "bold" }}>{message.subject}</Text>
+                  <Text>From: {message.sender.username}</Text>
+                  <Text>
+                    Date: {new Date(message.timestamp).toLocaleString()}
+                  </Text>
+                  <View style={{ marginTop: 5 }}>
+                    <WebView
+                      source={{ html: message.message }}
+                      style={{
+                        height: expandedMessages.includes(message.id)
+                          ? null
+                          : 100,
+                      }}
+                    />
+                    {message.message.split(" ").length > 10 &&
+                      !expandedMessages.includes(message.id) && (
+                        <Button
+                          title="Read More"
+                          onPress={() => expandMessage(message.id)}
+                        />
+                      )}
+                  </View>
+                </View>
+              ))}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  marginVertical: 10,
+                }}
+              >
+                <Button
+                  title="Previous"
+                  onPress={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                />
+                {pageNumbers.map((number) => (
+                  <Button
+                    key={number}
+                    title={number.toString()}
+                    onPress={() => paginate(number)}
+                    disabled={currentPage === number}
+                  />
+                ))}
+                <Button
+                  title="Next"
+                  onPress={() => paginate(currentPage + 1)}
+                  disabled={currentPage === pageNumbers.length}
+                />
+              </View>
+            </ScrollView>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    padding: 20,
+  },
+  container: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    marginVertical: 10,
     textAlign: "center",
-    marginTop: 20,
-  },
-  subject: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  sender: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  timestamp: {
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  message: {
-    fontSize: 16,
-    marginBottom: 10,
   },
   pagination: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "center",
     marginTop: 20,
   },
-  pageNumber: {
-    fontSize: 18,
-    fontWeight: "bold",
+  headerCell: {
+    width: 150,
+    marginLeft: 20,
+    borderRightWidth: 1,
+    borderColor: "black",
   },
-};
+  cell: {
+    width: 150,
+    marginLeft: 10,
+  },
+  snHeaderCell: {
+    width: 50,
+    borderRightWidth: 1,
+    borderColor: "black",
+  },
+  snCell: {
+    width: 50,
+  },
+});
 
 export default MessageInbox;

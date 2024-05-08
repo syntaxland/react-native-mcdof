@@ -40,7 +40,9 @@ const CheckoutScreen = () => {
     }
   }, [userInfo, navigation]);
 
-  const [order_id, setOrderId] = useState("");
+  const [order_id, setOrderId] = useState(""); 
+  console.log("order_id checkout:", order_id);
+
   const [paymentMethod] = useState("Paystack");
 
   const [refreshing, setRefreshing] = useState(false);
@@ -129,7 +131,7 @@ const CheckoutScreen = () => {
       throw error;
     });
 
-    navigation.navigate("Shipment", { orderId: order_id });
+    navigation.navigate("Shipment", { order_id: order_id });
   };
 
   return (

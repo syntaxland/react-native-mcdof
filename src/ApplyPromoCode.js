@@ -1,7 +1,14 @@
 // ApplyPromoCode.js
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  // TouchableOpacity,
+} from "react-native";
 import { applyPromoCode } from "./redux/actions/promoActions";
 import Message from "./Message";
 import Loader from "./Loader";
@@ -10,7 +17,8 @@ const ApplyPromoCode = ({ order_id }) => {
   const dispatch = useDispatch();
 
   const applyPomoCodeState = useSelector((state) => state.applyPomoCodeState);
-  const { loading, success, discountPercentage, promoDiscount, error } = applyPomoCodeState;
+  const { loading, success, discountPercentage, promoDiscount, error } =
+    applyPomoCodeState;
 
   const [promoCode, setPromoCode] = useState("");
 
@@ -31,7 +39,8 @@ const ApplyPromoCode = ({ order_id }) => {
         {error && <Message variant="danger">{error}</Message>}
         {success && (
           <Message variant="success">
-            Promo code "{promoCode}" with {discountPercentage}% discount applied successfully.
+            Promo code "{promoCode}" with {discountPercentage}% discount applied
+            successfully.
           </Message>
         )}
       </View>
@@ -43,7 +52,29 @@ const ApplyPromoCode = ({ order_id }) => {
           value={promoCode}
           onChangeText={setPromoCode}
         />
-        <Button title="Apply Promo Code" onPress={applyCodeHandler} />
+        <View
+          style={[
+            // styles.buttonContainer,
+            { backgroundColor: "#dc3545", borderRadius: 5 },
+          ]}
+        >
+          <Button
+            title="Apply Promo Code"
+            onPress={applyCodeHandler}
+            disabled={!promoCode.trim()}
+          />
+        </View>
+
+        {/* <TouchableOpacity
+          style={[
+            styles.button,
+            { backgroundColor: "#dc3545", padding: 7, borderRadius: 5 },
+          ]}
+          onPress={applyCodeHandler}
+          disabled={!promoCode.trim()}
+        >
+          <Text style={styles.buttonText}>Apply Promo Code</Text>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

@@ -8,7 +8,7 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome"; 
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -40,7 +40,8 @@ const ShipmentScreen = () => {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
 
-  const order_id = route.params.id;
+  const order_id = route.params.order_id;
+  console.log("order_id Shipment:", order_id);
 
   const submitHandler = () => {
     const shipmentData = {
@@ -114,8 +115,7 @@ const ShipmentScreen = () => {
               city === "" ||
               postalCode === "" ||
               country === "" ||
-              loading ||
-              success
+              loading 
             }
           />
         </View>

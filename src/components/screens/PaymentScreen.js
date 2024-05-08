@@ -23,7 +23,8 @@ import { API_URL } from "../../config/apiConfig";
 const PaymentScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const order_id = route.params.id;
+  const order_id = route.params.order_id;
+  console.log("order_id Payment:", order_id);
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -53,6 +54,7 @@ const PaymentScreen = () => {
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
   const [reference, setReference] = useState("");
   const userEmail = userInfo.email;
+// const createdAt = new Date().toISOString();
 
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);

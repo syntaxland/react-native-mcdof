@@ -1,21 +1,14 @@
 // Settings.js
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faExclamationTriangle,
-  faSun,
-  faMoon,
-} from "@fortawesome/free-solid-svg-icons";
-import { styles } from "../screenStyles";
+import { faExclamationTriangle, faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
 import Accordion from "react-native-collapsible/Accordion";
+import { styles } from "../screenStyles";
+import Loader from "../../Loader";
+import Message from "../../Message";
 
 const Settings = () => {
   const navigation = useNavigation();
@@ -54,10 +47,7 @@ const Settings = () => {
         <View style={styles.accordionContent}>
           <Text style={styles.formLabel}>Password</Text>
           <Text style={styles.formPlaceholder}>****************</Text>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleChangePassword}
-          >
+          <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
             <Text style={styles.buttonText}>Change Password</Text>
           </TouchableOpacity>
         </View>
@@ -69,16 +59,10 @@ const Settings = () => {
         <View style={styles.accordionContent}>
           <Text style={styles.warning}>
             <FontAwesomeIcon icon={faExclamationTriangle} style={styles.icon} />
-            Warning! This action is irreversible and all your data will be
-            deleted from our database.
+            Warning! This action is irreversible and all your data will be deleted from our database.
           </Text>
-          <TouchableOpacity
-            style={[styles.button, styles.dangerButton]}
-            onPress={handleDeleteAccount}
-          >
-            <Text style={[styles.buttonText, styles.dangerButtonText]}>
-              Delete Account
-            </Text>
+          <TouchableOpacity style={[styles.button, styles.dangerButton]} onPress={handleDeleteAccount}>
+            <Text style={[styles.buttonText, styles.dangerButtonText]}>Delete Account</Text>
           </TouchableOpacity>
         </View>
       ),
@@ -89,14 +73,13 @@ const Settings = () => {
     <ScrollView>
       <View style={styles.container}>
         <Text style={styles.title}>Settings</Text>
-
         {loading && <Loader />}
         {error && <Message variant="danger">{error}</Message>}
-
-        <Accordion sections={SECTIONS} />
+        {/* <Accordion sections={SECTIONS} /> */}
       </View>
     </ScrollView>
   );
 };
 
 export default Settings;
+

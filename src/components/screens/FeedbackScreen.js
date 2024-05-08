@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { createFeedback } from "../../actions/feedbackActions";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { createFeedback } from "../../redux/actions/feedbackActions";
 import Loader from "../../Loader";
 import Message from "../../Message";
 
 const FeedbackScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation(); 
   const route = useRoute();
   const dispatch = useDispatch();
 
