@@ -1,149 +1,98 @@
 // Paysofter.js
-import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text } from "react-native";
 import { useSelector } from "react-redux";
-// import PaysofterButton from "./PaysofterButton";
+import { useNavigation } from "@react-navigation/native";
 import ApplyPromoCode from "../../ApplyPromoCode";
-import LoaderPaysofter from "../../LoaderPaysofter";
-import Message from "../../Message";
-import { styles } from "./paysofterStyles";
+import PaysofterButton from "./PaysofterButton";
+import { styles } from "../screenStyles";
+import { formatAmount } from "../../FormatAmount";
 
 const Paysofter = ({
-  reference,
   order_id,
   totalPrice,
   taxPrice,
-  userEmail,
   shippingPrice,
   itemsPrice,
   finalItemsPrice,
   promoDiscount,
   discountPercentage,
-  promoTotalPrice,
   shipmentSave,
+  reference,
   paysofterPublicKey,
+  userEmail,
+  promoTotalPrice,
+  currency,
+  paymentData,
+  amount,
 }) => {
-  const paymentCreate = useSelector((state) => state.paymentCreate);
-  const { loading, error } = paymentCreate;
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
 
-  const cart = useSelector((state) => state.cart);
-  const { cartItems } = cart;
-
   const createdAt = new Date().toISOString();
-
-  const paymentData = {
-    reference: reference,
-    order_id: order_id,
-    amount: totalPrice,
-    email: userEmail,
-    items_amount: itemsPrice,
-    final_items_amount: finalItemsPrice,
-    promo_code_discount_amount: promoDiscount,
-    promo_code_discount_percentage: discountPercentage,
-    final_total_amount: promoTotalPrice,
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.listItem}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemText}>{item.name}</Text>
-        <Text style={styles.itemText}>
-          {item.qty} x NGN {item.price} = NGN {item.qty * item.price}
-        </Text>
-      </View>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Paysofter Payment Option</Text>
-      {loading && <LoaderPaysofter />}
-      {error && <Message variant="danger">{error}</Message>}
-      <FlatList
-        data={cartItems}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.product.toString()}
-      />
-      <Text style={styles.boldText}>Order ID: {order_id}</Text>
-      <Text style={styles.boldText}>
-        Shipping Address: {shipmentSave.address}, {shipmentSave.city},{" "}
-        {shipmentSave.country}
-      </Text>
-      <Text style={styles.boldText}>
-        Shipping Cost: NGN{" "}
-        {shippingPrice.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </Text>
-      <Text style={styles.boldText}>
-        Tax: NGN{" "}
-        {taxPrice.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </Text>
-      <Text style={styles.boldText}>
-        Total Amount: NGN{" "}
-        {totalPrice.toLocaleString(undefined, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}
-      </Text>
-      <Text style={styles.boldText}>
-        Promo Discount: NGN{" "}
-        {promoDiscount ? (
-          <Text style={styles.promoText}>
-            {promoDiscount.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            ({discountPercentage}%)
-          </Text>
-        ) : (
-          <Text>0</Text>
-        )}
-      </Text>
-      <Text style={styles.boldText}>
-        Final Total Amount: NGN{" "}
-        {promoTotalPrice ? (
-          <Text>
-            {promoTotalPrice.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </Text>
-        ) : (
-          <Text>
-            {totalPrice.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </Text>
-        )}
-      </Text>
-      <Text style={[styles.boldText, styles.timestamp]}>Timestamp: {createdAt}</Text>
-      <View style={styles.promoContainer}>
-        <ApplyPromoCode order_id={order_id} />
+      <Text style={styles.title}>Paysofter</Text>
+
+      <View style={styles.viewContainer}>
+        <Text>Order ID: {paymentData.order_id}</Text>
+        <Text>
+          Shipping Cost: {formatAmount(paymentData.shippingPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Tax: {formatAmount(paymentData.taxPrice)} {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Total Amount: {formatAmount(paymentData.totalPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Promo Discount: {formatAmount(paymentData?.promoDiscount)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Final Total Amount: {formatAmount(paymentData?.finalTotalPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>Timestamp: {createdAt}</Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <ApplyPromoCode order_id={paymentData.order_id} />
       </View>
       <View style={styles.buttonContainer}>
-        {/* <PaysofterButton
+        <PaysofterButton
           paymentData={paymentData}
           reference={reference}
           userEmail={userEmail}
           promoTotalPrice={promoTotalPrice}
           publicApiKey={paysofterPublicKey}
-        /> */}
+          currency={currency}
+          amount={amount}
+        />
+
+        {/* <Paystack
+              paystackKey={paystackPublicKey}
+              amount={paymentData.totalPrice}
+              billingEmail={userEmail}
+              billingMobile={paymentData.billingMobile}
+              reference={reference}
+              activityIndicatorColor="green"
+              onCancel={() => setPaymentInitiated(false)}
+              onSuccess={handlePaymentSuccess}
+              onError={handlePaymentError}
+              autoStart={true}
+            /> */}
       </View>
     </View>
   );

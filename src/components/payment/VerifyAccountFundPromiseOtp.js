@@ -5,37 +5,39 @@ import {
   Text,
   TextInput,
   Button,
-  Modal,
+  StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "../../actions/cartActions";
+import { Card } from "react-native-paper";
 import {
   createPayment,
+  resetPaymentState,
   debitPaysofterAccountFund,
+  resetDebitPaysofterState,
   verifyOtp,
+  resetVerifyOtpState,
   createPaysofterPromise,
-} from "../../actions/paymentActions";
-import Loader from "../Loader";
-import Message from "../Message";
+  resetCreatePaysofterPromiseState,
+} from "../../redux/actions/paymentActions";
+import { clearCart } from "../../redux/actions/cartActions";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loader from "../../Loader";
+import Message from "../../Message";
 import ConfirmPaysofterPromise from "./ConfirmPaysofterPromise";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 
 const VerifyAccountFundPromiseOtp = ({
-  promoTotalPrice,
+  buyerEmail,
+  amount,
+  sellerApiKey,
   paymentData,
   reference,
-  buyerEmail,
-  publicApiKey,
   formattedPayerEmail,
   currency,
   duration,
-  paymenthMethod,
-  paymentProvider,
 }) => {
-  const dispatch = useDispatch();
-
   const [otp, setOtp] = useState("");
   const [resendDisabled, setResendDisabled] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -46,58 +48,59 @@ const VerifyAccountFundPromiseOtp = ({
   const [showConfirmPaysofterPromise, setShowConfirmPaysofterPromise] =
     useState(false);
 
-  const otpVerifyState = useSelector((state) => state.otpVerifyState);
-  const { loading, success, error } = otpVerifyState;
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
-  }, [userInfo, navigation]);
+  }, [userInfo]);
+
+  const otpVerifyState = useSelector((state) => state.otpVerifyState);
+  const { loading, success, error } = otpVerifyState;
+
+  const createPaysofterPromiseState = useSelector(
+    (state) => state.createPaysofterPromiseState
+  );
+  const { loading: promiseLoading, error: promiseError } =
+    createPaysofterPromiseState;
+
+  const [sendOtpData, setSendOtpData] = useState(null);
 
   useEffect(() => {
-    if (success) {
-      dispatch(createPaysofterPromise(paysofterPromiseData));
-      setShowConfirmPaysofterPromise(true);
-      dispatch(createPayment(paymentData));
-      dispatch(clearCart());
-      setShowSuccessMessage(true);
-      setTimeout(() => {
-        // Navigate to the login screen or any other desired screen
-      }, 5000);
-    }
-    // eslint-disable-next-line
-  }, [dispatch, success]);
-
-  const sendOtpData =
-    JSON.parse(localStorage.getItem("debitAccountData")) || [];
+    const fetchSendOtpData = async () => {
+      const data = await AsyncStorage.getItem("debitAccountData");
+      setSendOtpData(JSON.parse(data));
+    };
+    fetchSendOtpData();
+  }, []);
 
   const otpData = {
     otp: otp,
-    account_id: sendOtpData.account_id,
-    amount: promoTotalPrice,
+    account_id: sendOtpData?.account_id,
+    amount: amount,
     currency: currency,
+    public_api_key: sellerApiKey,
   };
 
   const debitAccountData = {
-    account_id: sendOtpData.account_id,
-    security_code: sendOtpData.security_code,
-    amount: promoTotalPrice,
+    account_id: sendOtpData?.account_id,
+    security_code: sendOtpData?.security_code,
+    amount: amount,
   };
 
   const paysofterPromiseData = {
     payment_id: reference,
     email: buyerEmail,
-    amount: promoTotalPrice,
-    public_api_key: publicApiKey,
-    account_id: sendOtpData.account_id,
+    amount: amount,
+    public_api_key: sellerApiKey,
+    account_id: sendOtpData?.account_id,
     currency: currency,
     duration: duration,
-    payment_method: paymenthMethod,
-    payment_provider: paymentProvider,
     created_at: createdAt,
   };
 
@@ -105,11 +108,13 @@ const VerifyAccountFundPromiseOtp = ({
     dispatch(verifyOtp(otpData));
   };
 
-  const handleResendEmailOtp = () => {
+  const handleResendEmailOtp = async () => {
     setResendLoading(true);
     setResendMessage("");
     try {
-      dispatch(debitPaysofterAccountFund(JSON.stringify(debitAccountData)));
+      await dispatch(
+        debitPaysofterAccountFund(JSON.stringify(debitAccountData))
+      );
       setResendMessage(`OTP resent to ${formattedPayerEmail} successfully.`);
       setResendDisabled(true);
     } catch (error) {
@@ -132,77 +137,125 @@ const VerifyAccountFundPromiseOtp = ({
     };
   }, [countdown, resendDisabled]);
 
+  useEffect(() => {
+    if (success) {
+      dispatch(createPaysofterPromise(paysofterPromiseData));
+      setShowSuccessMessage(true);
+      dispatch(createPayment(paymentData));
+      setTimeout(() => {
+        AsyncStorage.removeItem("debitAccountData");
+        dispatch(resetPaymentState());
+        dispatch(resetCreatePaysofterPromiseState());
+        dispatch(resetDebitPaysofterState());
+        dispatch(resetVerifyOtpState());
+        dispatch(clearCart());
+        setShowConfirmPaysofterPromise(true);
+      }, 3000);
+    }
+  }, [dispatch, success, navigation]);
+
   return (
-    <>
-      {showConfirmPaysofterPromise ? (
-        <ConfirmPaysofterPromise
-          promoTotalPrice={promoTotalPrice}
-          paymentData={paymentData}
-          reference={reference}
-          buyerEmail={buyerEmail}
-          publicApiKey={publicApiKey}
-          currency={currency}
-          duration={duration}
-          paymenthMethod={paymenthMethod}
-        />
-      ) : (
-        <View style={{ padding: 16 }}>
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "bold",
-              textAlign: "center",
-              marginBottom: 16,
-            }}
-          >
-            Verify OTP
-          </Text>
-          {showSuccessMessage && (
-            <Message variant="success">Promise sent successfully!</Message>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Card style={styles.card}>
+        <Card.Content>
+          {showConfirmPaysofterPromise ? (
+            <ConfirmPaysofterPromise
+              amount={amount}
+              paymentData={paymentData}
+              reference={reference}
+              buyerEmail={buyerEmail}
+              sellerApiKey={sellerApiKey}
+              currency={currency}
+              duration={duration}
+            />
+          ) : (
+            <View style={styles.content}>
+              <Text style={styles.title}>Verify OTP ({currency})</Text>
+              {showSuccessMessage && (
+                <Message variant="success">Promise sent successfully!</Message>
+              )}
+              {loading && <Loader />}
+              {error && <Message variant="danger">{error}</Message>}
+              {promiseLoading && <Loader />}
+              {promiseError && (
+                <Message variant="danger">{promiseError}</Message>
+              )}
+              {resendMessage && (
+                <Message variant={resendLoading ? "info" : "success"}>
+                  {resendMessage}
+                </Message>
+              )}
+              <TextInput
+                style={styles.input}
+                value={otp}
+                onChangeText={(text) => setOtp(text)}
+                placeholder="Enter OTP"
+                required
+              />
+              <Button
+                title="Verify OTP"
+                onPress={handleVerifyEmailOtp}
+                disabled={loading || success}
+              />
+              <Text style={styles.infoText}>
+                OTP has been sent to your email {formattedPayerEmail} for
+                Paysofter Account ID: {sendOtpData?.account_id} and expires in
+                10 minutes. It might take a few seconds to deliver.
+              </Text>
+              <TouchableOpacity
+                onPress={handleResendEmailOtp}
+                disabled={resendDisabled || resendLoading}
+              >
+                <Text style={styles.resendText}>
+                  {resendLoading
+                    ? "Resending OTP..."
+                    : resendDisabled
+                    ? `Resend OTP (${countdown}sec)`
+                    : "Resend OTP"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
-          {loading && <Loader />}
-          {error && <Message variant="danger">{error}</Message>}
-          {resendMessage && (
-            <Message variant={resendLoading ? "info" : "success"}>
-              {resendMessage}
-            </Message>
-          )}
-          <TextInput
-            placeholder="Enter OTP"
-            value={otp}
-            onChangeText={setOtp}
-            style={{
-              borderWidth: 1,
-              borderColor: "gray",
-              marginBottom: 16,
-              padding: 8,
-            }}
-          />
-          <Button
-            title="Verify OTP"
-            onPress={handleVerifyEmailOtp}
-            disabled={loading || success}
-          />
-          <Text style={{ marginTop: 16 }}>
-            OTP has been sent to your email {formattedPayerEmail} for Paysofter
-            Account ID: {sendOtpData.account_id} and expires in 10 minutes. It
-            might take a few seconds to deliver.
-          </Text>
-          <Button
-            title={
-              resendLoading
-                ? "Resending OTP..."
-                : resendDisabled
-                ? `Resend OTP (${countdown}sec)`
-                : "Resend OTP"
-            }
-            onPress={handleResendEmailOtp}
-            disabled={resendDisabled || resendLoading}
-          />
-        </View>
-      )}
-    </>
+        </Card.Content>
+      </Card>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 5,
+  },
+  content: {
+    marginVertical: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#ddd",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 1,
+    padding: 10,
+    width: "100%",
+    marginBottom: 20,
+  },
+  infoText: {
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  resendText: {
+    color: "blue",
+    textDecorationLine: "underline",
+    textAlign: "center",
+  },
+});
 
 export default VerifyAccountFundPromiseOtp;

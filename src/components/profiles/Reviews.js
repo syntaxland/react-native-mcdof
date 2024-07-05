@@ -6,7 +6,7 @@ import { getUseReviews } from "../../redux/actions/orderActions";
 import Message from "../../Message";
 import Loader from "../../Loader";
 import Rating from "../../Rating";
-import Pagination from "../../Pagination";
+import Pagination from "../../Pagination"; 
 
 const Reviews = () => {
   const dispatch = useDispatch();

@@ -1,10 +1,13 @@
 // PaystackPayment.js
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, SafeAreaView, Button, Text } from "react-native";
+import { View, Button, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { clearCart } from "../../redux/actions/cartActions";
-import { createPayment } from "../../redux/actions/paymentActions";
+import {
+  createPayment,
+  resetPaymentState,
+} from "../../redux/actions/paymentActions";
 import ApplyPromoCode from "../../ApplyPromoCode";
 import Loader from "../../Loader";
 import Message from "../../Message";
@@ -12,6 +15,7 @@ import { Paystack } from "react-native-paystack-webview";
 import axios from "axios";
 import { API_URL } from "../../config/apiConfig";
 import { styles } from "../screenStyles";
+import { formatAmount } from "../../FormatAmount";
 
 const PaystackPayment = ({ paymentData }) => {
   const dispatch = useDispatch();
@@ -62,6 +66,7 @@ const PaystackPayment = ({ paymentData }) => {
     try {
       dispatch(createPayment(paymentData));
       dispatch(clearCart());
+      dispatch(resetPaymentState());
       setSuccess(true);
       setLoading(false);
       navigation.navigate("Home");
@@ -83,16 +88,32 @@ const PaystackPayment = ({ paymentData }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Paystack</Text>
+
       {loading && <Loader />}
       {error && <Message variant="danger">{error}</Message>}
       {success && <Message variant="success">Payment successful!</Message>}
-      <View>
+      <View style={styles.viewContainer}>
         <Text>Order ID: {paymentData.order_id}</Text>
-        <Text>Shipping Cost: NGN {paymentData.shippingPrice}</Text>
-        <Text>Tax: NGN {paymentData.taxPrice}</Text>
-        <Text>Total Amount: NGN {paymentData.totalPrice}</Text>
-        <Text>Promo Discount: NGN {paymentData.promoDiscount}</Text>
-        <Text>Final Total Amount: NGN {paymentData.finalTotalPrice}</Text>
+        <Text>
+          Shipping Cost: {formatAmount(paymentData.shippingPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Tax: {formatAmount(paymentData.taxPrice)} {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Total Amount: {formatAmount(paymentData.totalPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Promo Discount: {formatAmount(paymentData?.promoDiscount)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
+        <Text>
+          Final Total Amount: {formatAmount(paymentData?.finalTotalPrice)}{" "}
+          {paymentData?.currency}{" "}
+        </Text>
         <Text>Timestamp: {createdAt}</Text>
       </View>
 
@@ -102,9 +123,10 @@ const PaystackPayment = ({ paymentData }) => {
       <View style={styles.buttonContainer}>
         {!paymentInitiated && (
           <Button
-            style={styles.button}
+            // style={styles.buttonDark}
             title="Pay Now"
             onPress={initiatePayment}
+            color="#343a40"
           />
         )}
 

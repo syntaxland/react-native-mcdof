@@ -71,7 +71,6 @@ const SupportTicketScreen = () => {
             <Picker.Item label="OTP" value="otp" />
             <Picker.Item label="Payments" value="payments" />
             <Picker.Item label="Services" value="services" />
-            <Picker.Item label="Credit Points" value="credit_points" />
             <Picker.Item label="Referrals" value="referrals" />
             <Picker.Item label="Others" value="others" />
           </Picker>

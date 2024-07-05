@@ -1,12 +1,18 @@
 // ConfirmPaysofterPromise.js
 import React, { useEffect } from "react";
-import { View, Text, Button, StyleSheet, Linking } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "../../actions/cartActions";
+import { useSelector } from "react-redux";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Linking,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Card } from "react-native-paper";
 
 const ConfirmPaysofterPromise = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -14,30 +20,35 @@ const ConfirmPaysofterPromise = () => {
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
 
   const handleConfirmPromise = () => {
-    dispatch(clearCart());
     Linking.openURL("https://paysofter.com/promise/buyer");
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Confirm Paysofter Promise</Text>
-      <View style={styles.content}>
-        <Text style={styles.subtitle}>Promise successfully created!</Text>
-        <Text style={styles.description}>
-          Is Promise fulfilled? Check your email or login to your Paysofter
-          account to check out the Promise status to confirm.
-        </Text>
-        <Button
-          title="Confirm Promise (at Paysofter)"
-          onPress={handleConfirmPromise}
-          color="#007bff"
-        />
-      </View>
+      <Card style={styles.card}>
+        <Card.Content>
+          <View style={styles.innerContainer}>
+            <Text style={styles.title}>Promise successfully created!</Text>
+            <Text style={styles.description}>
+              Is Promise fulfilled? Check your email or login to your Paysofter
+              account to check out the Promise status to confirm.
+            </Text>
+
+            <View style={styles.formGroup}>
+              <TouchableOpacity onPress={handleConfirmPromise}>
+                <Text style={styles.roundedPrimaryBtn}>
+                  Confirm Promise (at Paysofter)
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
     </View>
   );
 };
@@ -47,25 +58,43 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 5,
+  },
+  innerContainer: {
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  content: {
-    alignItems: "center",
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 8,
+    marginBottom: 20,
+    textAlign: "center",
   },
   description: {
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 25,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  formGroup: {
+    padding: 5,
+    alignItems: "center",
   },
 });
 

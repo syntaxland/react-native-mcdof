@@ -16,7 +16,7 @@ import Message from "./Message";
 import Loader from "./Loader";
 import ProductPrice from "./ProductPrice";
 import PromoTimer from "./PromoTimer";
-import Rating from "./Rating";
+import Rating from "./Rating"; 
 import styles from "./ProductStyles";
 
 function Product({ product }) {

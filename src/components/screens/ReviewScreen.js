@@ -8,7 +8,7 @@ import Rating from "../Rating";
 
 const ReviewScreen = () => {
   const dispatch = useDispatch();
-  const { productId } = useParams();
+  const { productId } = useParams(); 
   
   const reviewList = useSelector((state) => state.reviewList);
   const { loading, error, reviews } = reviewList;
@@ -77,3 +77,4 @@ const ReviewScreen = () => {
 };
 
 export default ReviewScreen;
+ 

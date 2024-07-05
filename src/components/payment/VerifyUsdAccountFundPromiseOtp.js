@@ -1,4 +1,4 @@
-// VerifyAccountFundOtp.js
+// VerifyUsdAccountFundPromiseOtp.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -7,33 +7,32 @@ import {
   Button,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { Card } from "react-native-paper";
 import {
-  createPayment,
-  resetPaymentState,
-  createPaysofterPayment,
-  resetCreatePaysofterPaymentState,
-  debitPaysofterAccountFund,
-  resetDebitPaysofterState,
-  verifyOtp,
-  resetVerifyOtpState,
+  debitPaysofterUsdAccountFund,
+  resetDebitPaysofterUsdState,
+  verifyUsdOtp,
+  resetVerifyUsdOtpState,
+  createPaysofterPromise,
+  resetCreatePaysofterPromiseState,
 } from "../../redux/actions/paymentActions";
-import { clearCart } from "../../redux/actions/cartActions";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Loader from "../../Loader";
 import Message from "../../Message";
+import ConfirmPaysofterPromise from "./ConfirmPaysofterPromise";
 
-const VerifyAccountFundOtp = ({
+const VerifyUsdAccountFundPromiseOtp = ({
+  buyerEmail,
+  amount,
+  sellerApiKey,
   paymentData,
   reference,
-  userEmail,
-  amount,
-  currency,
-  paysofterPublicKey,
   formattedPayerEmail,
+  currency,
+  duration,
 }) => {
   const [otp, setOtp] = useState("");
   const [resendDisabled, setResendDisabled] = useState(false);
@@ -42,6 +41,7 @@ const VerifyAccountFundOtp = ({
   const [countdown, setCountdown] = useState(60);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const createdAt = new Date().toISOString();
+  const [showConfirmPaysofterPromise, setShowConfirmPaysofterPromise] = useState(false);
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -55,60 +55,56 @@ const VerifyAccountFundOtp = ({
     }
   }, [userInfo]);
 
-  const otpVerifyState = useSelector((state) => state.otpVerifyState);
-  const { loading, success, error } = otpVerifyState;
+  const otpVerifyUsdState = useSelector((state) => state.otpVerifyUsdState);
+  const { loading, success, error } = otpVerifyUsdState;
 
-  const paysofterPayment = useSelector((state) => state.paysofterPayment);
-  const {
-    success: paysofterPaymentSuccess,
-    // error: paysofterPaymentError,
-    // loading:paysofterPaymentLoading,
-  } = paysofterPayment;
+  const createPaysofterPromiseState = useSelector((state) => state.createPaysofterPromiseState);
+  const { loading: promiseLoading, error: promiseError } = createPaysofterPromiseState;
 
   const [sendOtpData, setSendOtpData] = useState(null);
 
   useEffect(() => {
     const fetchSendOtpData = async () => {
-      const data = await AsyncStorage.getItem("debitAccountData");
+      const data = await AsyncStorage.getItem("debitUsdAccountData");
       setSendOtpData(JSON.parse(data));
     };
     fetchSendOtpData();
   }, []);
-
-  const paysofterPaymentData = {
-    payment_id: reference,
-    email: userEmail,
-    amount: amount,
-    currency: currency,
-    public_api_key: paysofterPublicKey,
-    created_at: createdAt,
-  };
 
   const otpData = {
     otp: otp,
     account_id: sendOtpData?.account_id,
     amount: amount,
     currency: currency,
+    public_api_key: sellerApiKey,
   };
 
-  const debitAccountData = {
+  const debitUsdAccountData = {
     account_id: sendOtpData?.account_id,
     security_code: sendOtpData?.security_code,
     amount: amount,
+  };
+
+  const paysofterPromiseData = {
+    payment_id: reference,
+    email: buyerEmail,
+    amount: amount,
+    public_api_key: sellerApiKey,
+    account_id: sendOtpData?.account_id,
     currency: currency,
+    duration: duration,
+    created_at: createdAt,
   };
 
   const handleVerifyEmailOtp = () => {
-    dispatch(verifyOtp(otpData));
+    dispatch(verifyUsdOtp(otpData));
   };
 
   const handleResendEmailOtp = async () => {
     setResendLoading(true);
     setResendMessage("");
     try {
-      await dispatch(
-        debitPaysofterAccountFund(JSON.stringify(debitAccountData))
-      );
+      await dispatch(debitPaysofterUsdAccountFund(JSON.stringify(debitUsdAccountData)));
       setResendMessage(`OTP resent to ${formattedPayerEmail} successfully.`);
       setResendDisabled(true);
     } catch (error) {
@@ -131,74 +127,55 @@ const VerifyAccountFundOtp = ({
     };
   }, [countdown, resendDisabled]);
 
-  // const creditPointData = {
-  //   amount: amount,
-  // };
-
   useEffect(() => {
     if (success) {
-      dispatch(createPaysofterPayment(paysofterPaymentData));
+      dispatch(createPaysofterPromise(paysofterPromiseData));
+      setShowConfirmPaysofterPromise(true);
+      dispatch(resetDebitPaysofterUsdState());
+      dispatch(resetVerifyUsdOtpState());
+      dispatch(resetCreatePaysofterPromiseState());
+      AsyncStorage.removeItem("debitUsdAccountData");
+      setShowSuccessMessage(true);
+      // setTimeout(() => {
+        // setShowConfirmPaysofterPromise(true);
+      // }, 2000);
     }
   }, [dispatch, success, navigation]);
 
-  useEffect(() => {
-    if (paysofterPaymentSuccess) {
-      setShowSuccessMessage(true);
-      dispatch(createPayment(paymentData));
-
-      const timer = setTimeout(() => {
-        AsyncStorage.removeItem("debitAccountData");
-        setShowSuccessMessage(false);
-        dispatch(resetPaymentState());
-        dispatch(resetCreatePaysofterPaymentState());
-        dispatch(resetDebitPaysofterState());
-        dispatch(resetVerifyOtpState());
-        dispatch(clearCart());
-        navigation.navigate("Home");
-      }, 3000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [dispatch, navigation, paysofterPaymentSuccess]);
-
-  console.log(
-    "VerifyAccountFundOtp paysofterPaymentData",
-    paysofterPaymentData
-  );
-
   return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.header}>Verify OTP ({currency})</Text>
-          {showSuccessMessage && (
-            <Message variant="success">Payment made successfully!</Message>
-          )}
+    <ScrollView contentContainerStyle={styles.container}>
+      {showConfirmPaysofterPromise ? (
+        <ConfirmPaysofterPromise
+          amount={amount}
+          paymentData={paymentData}
+          reference={reference}
+          buyerEmail={buyerEmail}
+          sellerApiKey={sellerApiKey}
+          currency={currency}
+          duration={duration}
+        />
+      ) : (
+        <View style={styles.content}>
+          <Text style={styles.title}>Verify OTP ({currency})</Text>
+          {showSuccessMessage && <Message variant="success">Promise sent successfully!</Message>}
           {loading && <Loader />}
           {error && <Message variant="danger">{error}</Message>}
+          {promiseLoading && <Loader />}
+          {promiseError && <Message variant="danger">{promiseError}</Message>}
           {resendMessage && (
-            <Message variant={resendLoading ? "info" : "success"}>
-              {resendMessage}
-            </Message>
+            <Message variant={resendLoading ? "info" : "success"}>{resendMessage}</Message>
           )}
-
           <TextInput
             style={styles.input}
             value={otp}
             onChangeText={(text) => setOtp(text)}
             placeholder="Enter OTP"
-            keyboardType="numeric"
+            required
           />
-          <Button
-            onPress={handleVerifyEmailOtp}
-            title="Verify OTP"
-            disabled={loading}
-            color="#28a745"
-          />
-          <Text style={styles.otpInfo}>
-            OTP has been sent to email: {formattedPayerEmail} for Paysofter
-            Account ID: {sendOtpData?.account_id} and expires in 10 minutes. It
-            might take a few seconds to deliver.
+          <Button title="Verify OTP" onPress={handleVerifyEmailOtp} disabled={loading || success} />
+          <Text style={styles.infoText}>
+            OTP has been sent to your email {formattedPayerEmail} for Paysofter Account ID: {sendOtpData?.account_id} and expires in 10
+            minutes. It might take a few seconds to deliver.
           </Text>
           <TouchableOpacity
             onPress={handleResendEmailOtp}
@@ -212,48 +189,46 @@ const VerifyAccountFundOtp = ({
                 : "Resend OTP"}
             </Text>
           </TouchableOpacity>
-        </Card.Content>
-      </Card>
-    </View>
+        </View>
+      )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: 5,
+  },
+  content: {
+    marginVertical: 20,
     padding: 20,
+    borderWidth: 1,
+    borderRadius: 10,
+    borderColor: "#ddd",
     alignItems: "center",
   },
-  header: {
+  title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginVertical: 20,
+    marginBottom: 20,
   },
   input: {
     height: 40,
-    borderColor: "#ccc",
+    borderColor: "gray",
     borderWidth: 1,
-    borderRadius: 5,
     padding: 10,
     width: "100%",
     marginBottom: 20,
   },
-  otpInfo: {
+  infoText: {
     textAlign: "center",
     marginVertical: 20,
   },
   resendText: {
-    color: "#007bff",
+    color: "blue",
+    textDecorationLine: "underline",
     textAlign: "center",
-    marginTop: 20,
-  },
-  message: {
-    padding: 10,
-    marginBottom: 10,
-    alignItems: "center",
-    textAlign: "center",
-    justifyContent: "center",
   },
 });
 
-export default VerifyAccountFundOtp;
+export default VerifyUsdAccountFundPromiseOtp;

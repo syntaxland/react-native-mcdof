@@ -266,8 +266,8 @@ const RegisterScreen = () => {
         <View style={styles.container}>
           <Text style={styles.title}>Register</Text>
           {loading && <Loader />}
-          {error && <Message variant="error">{error}</Message>}
-          {formError && <Message variant="error">{formError}</Message>}
+          {error && <Message variant="danger">{error}</Message>}
+          {formError && <Message variant="danger">{formError}</Message>}
 
           <View style={styles.inputContainer}>
             <FontAwesomeIcon icon={faUser} style={styles.icon} />

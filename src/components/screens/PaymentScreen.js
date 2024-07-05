@@ -14,9 +14,8 @@ import { faArrowLeft, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import PaystackPayment from "../payment/PaystackPayment";
-// import Paysofter from "../payment/Paysofter";
+import Paysofter from "../payment/Paysofter";
 import { styles } from "../screenStyles";
-
 import axios from "axios";
 import { API_URL } from "../../config/apiConfig";
 
@@ -54,7 +53,8 @@ const PaymentScreen = () => {
   const [paystackPublicKey, setPaystackPublicKey] = useState("");
   const [reference, setReference] = useState("");
   const userEmail = userInfo.email;
-// const createdAt = new Date().toISOString();
+  // const createdAt = new Date().toISOString();
+  const currency = "NGN";
 
   const [selectedPaymentGateway, setSelectedPaymentGateway] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -134,10 +134,9 @@ const PaymentScreen = () => {
     promoDiscount,
     discountPercentage,
     promoTotalPrice,
-    // publicKey,
     paystackPublicKey,
     paysofterPublicKey,
-    // shipmentSave,
+    currency,
   };
   console.log("paymentData:", paymentData);
 
@@ -152,9 +151,8 @@ const PaymentScreen = () => {
       <ScrollView>
         <View style={styles.container}>
           <Text style={styles.title}>Payment Page</Text>
-          {/* Render payment gateway buttons */}
           <TouchableOpacity
-            style={styles.button}
+            style={styles.buttonDark}
             onPress={() => handlePaymentGatewaySelection("paystack")}
           >
             <Text style={styles.buttonText}>Pay with Paystack</Text>
@@ -166,21 +164,22 @@ const PaymentScreen = () => {
           >
             <Text style={styles.buttonText}>Pay with Paysofter</Text>
           </TouchableOpacity>
-          {/* Render other payment gateway buttons */}
-          {/* Add modals or additional components here */}
+
           {selectedPaymentGateway === "paystack" && (
             <PaystackPayment paymentData={paymentData} />
           )}
 
-          {/* {selectedPaymentGateway === "paysofter" && (
+          {selectedPaymentGateway === "paysofter" && (
             <Paysofter
-              // paymentData={paymentData}
+              paymentData={paymentData}
               reference={reference}
               order_id={order_id}
               userEmail={userEmail}
               paysofterPublicKey={paysofterPublicKey}
+              currency={currency}
+              amount={finalItemsPrice}
             />
-          )} */}
+          )}
 
           {/* Modal for Paysofter Account Info */}
           <Modal

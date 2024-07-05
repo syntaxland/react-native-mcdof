@@ -35,6 +35,13 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
   },
+  buttonDark: {
+    backgroundColor: "#343a40",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
   buttonText: {
     color: "#fff",
     fontSize: 16,
@@ -42,10 +49,12 @@ export const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: "100%",
-    paddingHorizontal: 3,
+    paddingHorizontal: 3, 
     marginTop: 10,
   },
-
+  viewContainer: {
+    paddingVertical: 10,
+  },
   registerButton: {
     width: "100%",
   },

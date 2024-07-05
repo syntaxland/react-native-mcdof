@@ -6,10 +6,10 @@ import {
   VERIFY_OTP_REQUEST,
   VERIFY_OTP_SUCCESS,
   VERIFY_OTP_FAIL,
-
+  RESET_VERIFY_OTP_STATE,
   VERIFY_USD_OTP_REQUEST,
-VERIFY_USD_OTP_SUCCESS,
-VERIFY_USD_OTP_FAIL, 
+  VERIFY_USD_OTP_SUCCESS,
+  VERIFY_USD_OTP_FAIL,
 } from "../constants/accountFundOtpConstants";
 
 const initialState = {
@@ -57,6 +57,8 @@ export const otpVerifyReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_VERIFY_OTP_STATE:
+      return {};
     default:
       return state;
   }

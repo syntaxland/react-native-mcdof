@@ -2,7 +2,7 @@
 
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create({ 
   card: {
     marginVertical: 10,
     marginHorizontal: 15,
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 200,
     borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderTopRightRadius: 10, 
   },
   body: {
     padding: 10,

@@ -13,7 +13,7 @@ import {
 import { WebView } from "react-native-webview";
 import { getMessages } from "../../redux/actions/messagingActions";
 import Message from "../../Message";
-import Loader from "../../Loader";
+import Loader from "../../Loader"; 
 
 const MessageInbox = () => {
   const dispatch = useDispatch();

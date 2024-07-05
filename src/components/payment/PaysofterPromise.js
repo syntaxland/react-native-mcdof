@@ -1,29 +1,37 @@
 // PaysofterPromise.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   TextInput,
   Button,
   Modal,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import Message from "../Message";
-import Loader from "../Loader";
-import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { Picker } from "@react-native-picker/picker";
+import { useSelector } from "react-redux";
+import { Card } from "react-native-paper";
+import PaysofterAccountFundPromise from "./PaysofterAccountFundPromise";
+import PaysofterUsdAccountFundPromise from "./PaysofterUsdAccountFundPromise";
 import { useNavigation } from "@react-navigation/native";
+import Message from "../../Message";
+import Loader from "../../Loader";
+import { PAYMENT_DURATION_CHOICES } from "./payment-constants";
 
 const PaysofterPromise = ({
-  promoTotalPrice,
+  buyerEmail,
+  currency,
+  amount,
+  sellerApiKey,
   paymentData,
   reference,
-  userEmail,
-  publicApiKey,
 }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
@@ -31,7 +39,7 @@ const PaysofterPromise = ({
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
 
@@ -40,108 +48,268 @@ const PaysofterPromise = ({
   );
   const { loading, success, error } = debitPaysofterAccountState;
 
+  const [durationChoices, setDurationChoices] = useState([]);
+  useEffect(() => {
+    setDurationChoices(PAYMENT_DURATION_CHOICES);
+  }, []);
+
   const [duration, setDuration] = useState("Within 1 day");
-  const [currency, setCurrency] = useState("NGN");
-  const [paymenthMethod, setPaymenthMethod] = useState("Paysofter Promise");
-  const [paymentProvider, setPaymentProvider] = useState("Paysofter");
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showPaysofterAccountFundPromise, setShowPaysofterAccountFundPromise] =
     useState(false);
 
-  const handleShowPaysofterAccountFundPromise = () => {
+  const handleShowPaysofterAccountFundPromise = useCallback(() => {
     setShowPaysofterAccountFundPromise(true);
-  };
+  }, []);
 
-  const handleInfoModalShow = () => {
+  const handleInfoModalShow = useCallback(() => {
     setShowInfoModal(true);
-  };
+  }, []);
 
-  const handleInfoModalClose = () => {
+  const handleInfoModalClose = useCallback(() => {
     setShowInfoModal(false);
-  };
+  }, []);
 
-  const submitHandler = () => {
-    // Handle form submission here
-  };
+  const submitHandler = useCallback(
+    (e) => {
+      e.preventDefault();
+      handleShowPaysofterAccountFundPromise();
+    },
+    [handleShowPaysofterAccountFundPromise]
+  );
 
   useEffect(() => {
     if (success) {
-      setTimeout(() => {}, 3000);
+      const timer = setTimeout(() => {}, 3000);
+      return () => clearTimeout(timer);
     }
   }, [success]);
 
+  const handleFieldChange = (field, value) => {
+    if (field === "duration") {
+      setDuration(value);
+    }
+  };
+
+  const handleLearnMore = () => {
+    Linking.openURL("https://paysofter.com/");
+  };
+
   return (
-    <>
-      {showPaysofterAccountFundPromise ? (
-        <PaysofterAccountFundPromise
-          promoTotalPrice={promoTotalPrice}
-          userEmail={userEmail}
-          publicApiKey={publicApiKey}
-          paymentData={paymentData}
-          reference={reference}
-          currency={currency}
-          duration={duration}
-          paymenthMethod={paymenthMethod}
-          paymentProvider={paymentProvider}
-        />
-      ) : (
-        <View style={{ padding: 16 }}>
-          <View style={{ alignItems: "center" }}>
-            <Text
-              style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16 }}
-            >
-              Paysofter Promise
-            </Text>
-            <TouchableOpacity onPress={handleInfoModalShow}>
-              <FontAwesomeIcon icon={faInfoCircle} size={20} />
-            </TouchableOpacity>
-            <Modal visible={showInfoModal} animationType="slide" transparent>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <View style={{ backgroundColor: "white", padding: 20 }}>
-                  <Text>
-                    Paysofter Promise option escrows or places in custody the
-                    payment made to a seller until a specified condition has
-                    been fulfilled.
-                  </Text>
-                  <Button title="Close" onPress={handleInfoModalClose} />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <Card style={styles.card}>
+          <Card.Content>
+            {showPaysofterAccountFundPromise ? (
+              <>
+                {currency === "USD" ? (
+                  <PaysofterUsdAccountFundPromise
+                    currency={currency}
+                    amount={amount}
+                    buyerEmail={buyerEmail}
+                    sellerApiKey={sellerApiKey}
+                    paymentData={paymentData}
+                    reference={reference}
+                    duration={duration}
+                  />
+                ) : (
+                  <PaysofterAccountFundPromise
+                    currency={currency}
+                    amount={amount}
+                    buyerEmail={buyerEmail}
+                    sellerApiKey={sellerApiKey}
+                    paymentData={paymentData}
+                    reference={reference}
+                    duration={duration}
+                  />
+                )}
+              </>
+            ) : (
+              <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                  <View style={styles.labelContainer}>
+                    <Text style={styles.headerText}>Paysofter Promise </Text>
+                    <TouchableOpacity onPress={handleInfoModalShow}>
+                      <FontAwesomeIcon
+                        icon={faInfoCircle}
+                        size={16}
+                        style={styles.icon}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <Modal
+                  visible={showInfoModal}
+                  onRequestClose={handleInfoModalClose}
+                  transparent={true}
+                  animationType="slide"
+                >
+                  <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                      <Text style={styles.modalTitle}>Paysofter Promise</Text>
+                      <Text style={styles.modalText}>
+                        Paysofter Promise option escrows or places in custody
+                        the payment made to a seller (using the payer's funded
+                        Paysofter Account Fund) until a specified condition has
+                        been fulfilled.
+                      </Text>
+                      <View style={styles.learnMoreBtn}>
+                        <Button title="Learn more" onPress={handleLearnMore} />
+                      </View>
+                      <Button title="Close" onPress={handleInfoModalClose} />
+                    </View>
+                  </View>
+                </Modal>
+
+                {success && (
+                  <Message variant="success">
+                    Payment made successfully.
+                  </Message>
+                )}
+                {error && <Message variant="danger">{error}</Message>}
+                {loading && <Loader />}
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Currency</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={currency}
+                    editable={false}
+                  />
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Expected Settlement Duration</Text>
+                  <View style={styles.selectContainer}>
+                    <Picker
+                      style={styles.picker}
+                      selectedValue={duration}
+                      // onValueChange={(itemValue) => setDuration(itemValue)}
+                      onValueChange={(itemValue) =>
+                        handleFieldChange("duration", itemValue)
+                      }
+                    >
+                      {durationChoices.map(([value, label]) => (
+                        <Picker.Item key={value} label={label} value={value} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <TouchableOpacity onPress={submitHandler}>
+                    <Text style={styles.roundedPrimaryBtn}>Submit</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </Modal>
-          </View>
-
-          {success && (
-            <Message variant="success">Payment made successfully.</Message>
-          )}
-          {error && <Message variant="danger">{error}</Message>}
-          {loading && <Loader />}
-
-          <View style={{ marginVertical: 10 }}>
-            <Text>Currency</Text>
-            <TextInput
-              value={currency}
-              onChangeText={setCurrency}
-              editable={false}
-              style={{ borderWidth: 1, borderColor: "gray", padding: 8 }}
-            />
-          </View>
-
-          {/* Other form fields */}
-
-          <Button title="Submit" onPress={submitHandler} />
-          <Button
-            title="Proceed to Paysofter Account Fund"
-            onPress={handleShowPaysofterAccountFundPromise}
-          />
-        </View>
-      )}
-    </>
+            )}
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  scrollViewContainer: {
+    padding: 20,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 5,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  selectContainer: {
+    width: "100%",
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    padding: 2,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  input: {
+    borderColor: "#ced4da",
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#e9ecef",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 16,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  labelContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  label: {
+    marginBottom: 8,
+    fontSize: 16,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  learnMoreBtn: {
+    padding: 5,
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: "100%",
+    // marginBottom: 10,
+  },
+});
 
 export default PaysofterPromise;

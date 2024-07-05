@@ -14,9 +14,6 @@ import ShipmentScreen from "../components/screens/ShipmentScreen";
 import PaymentScreen from "../components/screens/PaymentScreen";
 import FeedbackScreen from "../components/screens/FeedbackScreen";
 import SupportTicketScreen from "../components/screens/SupportTicketScreen";
-// import FeedbackScreen from "../components/screens/FeedbackScreen";
-// import FeedbackScreen from "../components/screens/FeedbackScreen";
-// import FeedbackScreen from "../components/screens/FeedbackScreen";
 import Orders from "../components/profiles/Orders"; 
 import Payments from "../components/profiles/Payments"; 
 import OrderItem from "../components/profiles/OrderItem"; 
@@ -38,7 +35,7 @@ const Stack = createStackNavigator();
 
 export const HomeStack = () => {
   const navigation = useNavigation();
-  const cartItemsCount = useSelector((state) => state.cart.cartItems.length);
+  const cartItemsCount = useSelector((state) => state?.cart?.cartItems?.length);
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation, cartItemsCount)}>
@@ -74,7 +71,7 @@ export const HomeStack = () => {
 
 export const UserDashboardStack = () => {
   const navigation = useNavigation();
-  const cartItemsCount = useSelector((state) => state.cart.cartItems.length);
+  // const cartItemsCount = useSelector((state) => state.cart?.cartItems?.length);
 
   return (
     <Stack.Navigator screenOptions={() => navOptions(navigation)}>

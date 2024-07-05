@@ -12,7 +12,7 @@ import { API_URL } from "../../config/apiConfig";
 export const addToCart = (id, qty) => async (dispatch, getState) => {
   const { data } = await axios.get(`${API_URL}/api/products/${id}`);
 
-  dispatch({
+  dispatch({ 
     type: CART_ADD_ITEM,
     payload: {
       product: data._id,
@@ -23,7 +23,6 @@ export const addToCart = (id, qty) => async (dispatch, getState) => {
       qty,
     },
   });
-  // localStorage.setItem("cartItems", JSON.stringify(getState().cart.cartItems));
   await AsyncStorage.setItem(
     "cartItems",
     JSON.stringify(getState().cart.cartItems)
@@ -36,7 +35,6 @@ export const removeFromCart = (id) => async (dispatch, getState) => {
     payload: id,
   });
 
-  // localStorage.setItem("cartItems", JSON.stringify(getState().cart.cartItems));
   await AsyncStorage.setItem(
     "cartItems",
     JSON.stringify(getState().cart.cartItems)
@@ -49,7 +47,6 @@ export const saveShippingAddress = (data) => async (dispatch) => {
       type: CART_SAVE_SHIPPING_ADDRESS,
       payload: data,
     });
-    // localStorage.setItem("shipmentData", JSON.stringify(data));
   } catch (error) {
     console.log(error);
   }

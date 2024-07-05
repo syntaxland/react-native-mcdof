@@ -7,7 +7,7 @@ import Product from "../../Product";
 import Loader from "../../Loader";
 import Message from "../../Message";
 import Pagination from "../../Pagination";
-import { styles } from "../screenStyles";
+import { styles } from "../screenStyles"; 
 
 function GetProductScreen() {
   const dispatch = useDispatch();

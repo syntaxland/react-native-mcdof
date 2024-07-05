@@ -1,9 +1,10 @@
 // BankPayment.js
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const BankPayment = () => {
-  // Bank transfer payment UI elements and logic
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;

@@ -3,6 +3,7 @@ import {
   PAYMENT_CREATE_REQUEST,
   PAYMENT_CREATE_SUCCESS,
   PAYMENT_CREATE_FAIL,
+  RESET_PAYMENT_CREATE_STATE,
   PAYMENT_LIST_REQUEST,
   PAYMENT_LIST_SUCCESS,
   PAYMENT_LIST_FAIL,
@@ -12,19 +13,21 @@ import {
   PAYSOFTER_PAYMENT_CREATE_REQUEST,
   PAYSOFTER_PAYMENT_CREATE_SUCCESS,
   PAYSOFTER_PAYMENT_CREATE_FAIL,
+  RESET_PAYSOFTER_PAYMENT_STATE,
   DEBIT_PAYSOFTER_ACCOUNT_REQUEST,
   DEBIT_PAYSOFTER_ACCOUNT_SUCCESS,
   DEBIT_PAYSOFTER_ACCOUNT_FAIL,
+  RESET_DEBIT_PAYSOFTER_NGN_STATE,
   CREATE_PAYSOFTER_PROMISE_REQUEST,
   CREATE_PAYSOFTER_PROMISE_SUCCESS,
   CREATE_PAYSOFTER_PROMISE_FAIL,
+  RESET_CREATE_PAYSOFTER_PROMISE_STATE,
   GET_PAYMENT_API_KEYS_REQUEST,
   GET_PAYMENT_API_KEYS_SUCCESS,
   GET_PAYMENT_API_KEYS_FAIL,
-
   DEBIT_PAYSOFTER_USD_ACCOUNT_REQUEST,
-DEBIT_PAYSOFTER_USD_ACCOUNT_SUCCESS,
-DEBIT_PAYSOFTER_USD_ACCOUNT_FAIL,
+  DEBIT_PAYSOFTER_USD_ACCOUNT_SUCCESS,
+  DEBIT_PAYSOFTER_USD_ACCOUNT_FAIL,
 } from "../constants/paymentConstants";
 
 const initialState = {
@@ -38,7 +41,10 @@ const initialState = {
   error: null,
 };
 
-export const debitPaysofterUsdAccountReducer = (state = initialState, action) => {
+export const debitPaysofterUsdAccountReducer = (
+  state = initialState,
+  action
+) => {
   switch (action.type) {
     case DEBIT_PAYSOFTER_USD_ACCOUNT_REQUEST:
       return {
@@ -106,6 +112,8 @@ export const paymentCreateReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_PAYMENT_CREATE_STATE:
+      return {};
     default:
       return state;
   }
@@ -128,6 +136,8 @@ export const paysofterPaymentCreateReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_PAYSOFTER_PAYMENT_STATE:
+      return {};
     default:
       return state;
   }
@@ -151,6 +161,8 @@ export const debitPaysofterAccountReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_DEBIT_PAYSOFTER_NGN_STATE:
+      return {};
     default:
       return state;
   }
@@ -175,6 +187,8 @@ export const createPaysofterPromiseReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case RESET_CREATE_PAYSOFTER_PROMISE_STATE:
+      return {};
     default:
       return state;
   }

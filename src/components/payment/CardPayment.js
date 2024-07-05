@@ -1,91 +1,106 @@
 // CardPayment.js
 import React, { useState, useEffect } from "react";
-import { Form, Button } from "react-bootstrap";
-import DatePicker from "react-datepicker";
-import { useHistory } from "react-router-dom";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+// import DatePicker from "react-native-datepicker";
+import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
-import { clearCart } from "../../actions/cartActions";
+import { clearCart } from "../../redux/actions/cartActions";
 import {
   createPayment,
+  resetPaymentState,
   createPaysofterPayment,
-} from "../../actions/paymentActions"; 
-import Message from "../Message";
-import Loader from "../Loader";
+  resetCreatePaysofterPaymentState,
+} from "../../redux/actions/paymentActions";
+import { Picker } from "@react-native-picker/picker";
+import { Card } from "react-native-paper";
+import { formatAmount } from "../../FormatAmount";
+import { MONTH_CHOICES, YEAR_CHOICES } from "./payment-constants";
+import Message from "../../Message";
+import Loader from "../../Loader";
 
-function CardPayment({
-  promoTotalPrice,
+const CardPayment = ({
+  // promoTotalPrice,
   paymentData,
   reference,
-  userEmail,
   publicApiKey,
-}) {
+  amount,
+  currency,
+  userEmail,
+  // paysofterPublicKey,
+}) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigation = useNavigation();
 
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      window.location.href = "/login";
+      navigation.navigate("Login");
     }
   }, [userInfo]);
 
   const paysofterPayment = useSelector((state) => state.paysofterPayment);
   const { loading, success, error } = paysofterPayment;
 
+  const [monthChoices, setMonthChoices] = useState([]);
+  const [yearChoices, setYearChoices] = useState([]);
+
+  useEffect(() => {
+    setMonthChoices(MONTH_CHOICES);
+    setYearChoices(YEAR_CHOICES);
+  }, []);
+
   const [cardType, setCardType] = useState("");
   const [paymentDetails, setPaymentDetails] = useState({
     cardNumber: "",
-    expirationMonthYear: null,
-    expirationMonth: null,
-    expirationYear: null,
+    expirationMonth: "",
+    expirationYear: "",
     cvv: "",
   });
 
-  const [
-    isExpirationMonthYearSelected,
-    setIsExpirationMonthYearSelected,
-  ] = useState(false);
-
-  const handlePaymentDetailsChange = (e) => {
-    const { name, value } = e.target;
-
-    // Detect card type based on the card number prefix
+  const handlePaymentDetailsChange = (name, value) => {
     let detectedCardType = "";
-    if (/^4/.test(value)) {
-      detectedCardType = "Visa";
-    } else if (/^5[1-5]/.test(value)) {
-      detectedCardType = "Mastercard";
+    if (name === "cardNumber") {
+      if (/^4/.test(value)) {
+        detectedCardType = "Visa";
+      } else if (/^5[1-5]/.test(value)) {
+        detectedCardType = "Mastercard";
+      }
+      setCardType(detectedCardType);
     }
-    setCardType(detectedCardType);
     setPaymentDetails({ ...paymentDetails, [name]: value });
   };
 
   const isFormValid = () => {
     return (
-      isExpirationMonthYearSelected &&
       paymentDetails.cardNumber &&
+      paymentDetails.expirationMonth &&
+      paymentDetails.expirationYear &&
       paymentDetails.cvv
     );
   };
 
   const createdAt = new Date().toISOString();
-  const currency = "NGN";
 
-  const submitHandler = (e) => {
-    e.preventDefault();
-
+  const submitHandler = () => {
     const paysofterPaymentData = {
       payment_id: reference,
-      email: userEmail,
-      amount: promoTotalPrice,
       public_api_key: publicApiKey,
-      created_at: createdAt,
+      email: userEmail,
+      amount: amount,
       currency: currency,
-
+      created_at: createdAt,
       card_number: paymentDetails.cardNumber,
-      expiration_month_year: paymentDetails.expirationMonthYear,
+      expiration_month: paymentDetails.expirationMonth,
+      expiration_year: paymentDetails.expirationYear,
       cvv: paymentDetails.cvv,
     };
 
@@ -95,108 +110,186 @@ function CardPayment({
   useEffect(() => {
     if (success) {
       dispatch(createPayment(paymentData));
-      dispatch(clearCart());
       const timer = setTimeout(() => {
-        window.location.reload();
-        // history.push("/dashboard");
-        window.location.href = "/dashboard/users";
+        dispatch(clearCart());
+        dispatch(resetPaymentState());
+        dispatch(resetCreatePaysofterPaymentState());
+        navigation.navigate("Home");
       }, 5000);
       return () => clearTimeout(timer);
     }
-    // console.log('// eslint-disable-next-line')
-    // eslint-disable-next-line
-  }, [dispatch, success, history]);
+  }, [dispatch, success, navigation]);
 
   return (
-    <div>
-      <h2 className="py-2 text-center">Debit Card</h2>
-      {success && (
-        <Message variant="success">Payment made successfully.</Message>
-      )}
-
-      {error && <Message variant="danger">{error}</Message>}
-      {loading && <Loader />}
-      <Form onSubmit={submitHandler}>
-        <Form.Group>
-          <Form.Label>Card Number</Form.Label>
-          <Form.Control
-            type="text"
-            name="cardNumber"
-            value={paymentDetails.cardNumber}
-            onChange={handlePaymentDetailsChange}
-            required
-            placeholder="1234 5678 9012 3456"
-            maxLength="16"
-          />
-        </Form.Group>
-        {cardType && (
-          <p>
-            Detected Card Type: {cardType}
-            {cardType === "Visa " && <i className="fab fa-cc-visa"></i>}
-            {cardType === "Mastercard " && (
-              <i className="fab fa-cc-mastercard"></i>
+    <ScrollView>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.header}>Debit Card</Text>
+            {success && (
+              <Message variant="success">Payment made successfully.</Message>
             )}
-          </p>
-        )}
-        <i className="fab fa-cc-mastercard"></i>{" "}
-        <i className="fab fa-cc-visa"></i>
-        <Form.Group>
-          <Form.Label>Expiration Month/Year</Form.Label>
-          {/*<Form.Control
-            type="text" // You can change this to 'date' for separate month and year fields
-            name="expirationMonthYear"
-            value={paymentDetails.expirationMonthYear}
-            onChange={handlePaymentDetailsChange}
-            required
-            placeholder="MM/YY"
-          /> */}
-          <DatePicker
-            selected={paymentDetails.expirationMonthYear}
-            onChange={(date) => {
-              setPaymentDetails({
-                ...paymentDetails,
-                expirationMonthYear: date,
-              });
-              setIsExpirationMonthYearSelected(!!date);
-            }}
-            dateFormat="MM/yy"
-            showMonthYearPicker
-            isClearable
-            placeholderText="Select month/year"
-            className="rounded-select"
-          />
-        </Form.Group>
-        <Form.Group>
-          <Form.Label>CVV</Form.Label>
-          <Form.Control
-            type="password"
-            name="cvv"
-            value={paymentDetails.cvv}
-            onChange={handlePaymentDetailsChange}
-            required
-            maxLength="3"
-            placeholder="123"
-          />
-        </Form.Group>
-        <div className="text-center w-100 py-2">
-          <Button variant="primary" type="submit" disabled={!isFormValid()}>
-            Pay{" "}
-            <span>
-              (NGN{" "}
-              {promoTotalPrice.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-              )
-            </span>
-          </Button>
-        </div>
-        <div className="py-2 d-flex justify-content-center">
-          <Form.Text className="text-danger">{error}</Form.Text>
-        </div>
-      </Form>
-    </div>
+            {error && <Message variant="danger">{error}</Message>}
+            {loading && <Loader />}
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Card Number</Text>
+              <TextInput
+                style={styles.input}
+                value={paymentDetails.cardNumber}
+                onChangeText={(value) =>
+                  handlePaymentDetailsChange("cardNumber", value)
+                }
+                placeholder="1234 5678 9012 3456"
+                keyboardType="numeric"
+                maxLength={16}
+              />
+              {cardType ? <Text>Detected Card Type: {cardType}</Text> : null}
+            </View>
+
+            <View style={styles.spaceBtwGroup}>
+              <Text style={styles.label}>Expiration Month</Text>
+              <View style={styles.dateContainer}>
+                <Picker
+                  selectedValue={paymentDetails.expirationMonth}
+                  // style={styles.picker}
+                  onValueChange={(value) =>
+                    handlePaymentDetailsChange("expirationMonth", value)
+                  }
+                >
+                  <Picker.Item label="Select Month" value="" />
+                  {monthChoices.map(([value, label]) => (
+                    <Picker.Item key={value} label={label} value={value} />
+                  ))}
+                </Picker>
+              </View>
+
+              <Text style={styles.label}>Expiration Year</Text>
+              <View style={styles.dateContainer}>
+                <Picker
+                  selectedValue={paymentDetails.expirationYear}
+                  // style={styles.picker}
+                  onValueChange={(value) =>
+                    handlePaymentDetailsChange("expirationYear", value)
+                  }
+                >
+                  <Picker.Item label="Select Year" value="" />
+                  {yearChoices.map(([value, label]) => (
+                    <Picker.Item key={value} label={label} value={value} />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>CVV</Text>
+              <TextInput
+                style={styles.input}
+                value={paymentDetails.cvv}
+                onChangeText={(value) =>
+                  handlePaymentDetailsChange("cvv", value)
+                }
+                placeholder="123"
+                secureTextEntry
+                maxLength={3}
+                keyboardType="numeric"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={submitHandler}
+              disabled={!isFormValid()}
+            >
+              <Text style={styles.buttonText}>
+                Pay ({formatAmount(amount)} {currency})
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.errorContainer}>
+              {error && <Text style={styles.error}>{error}</Text>}
+            </View>
+          </Card.Content>
+        </Card>
+      </View>
+    </ScrollView>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    // backgroundColor: "white",
+    flex: 1,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 20,
+  },
+  formGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+  },
+  dateContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  spaceBtwGroup: {
+    // flexDirection: "row",
+    // justifyContent: "space-between",
+    // paddingVertical: 2,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  message: {
+    padding: 10,
+    marginBottom: 10,
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: 20,
+  },
+  errorContainer: {
+    paddingVertical: 10,
+    alignItems: "center",
+    textAlign: "center",
+    justifyContent: "center",
+  },
+  error: {
+    fontSize: 14,
+    color: "red",
+    textAlign: "center",
+    padding: 10,
+  },
+});
 
 export default CardPayment;

@@ -1,18 +1,20 @@
 // QrPayment.js
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const QrPayment = () => {
-  
+  const navigation = useNavigation();
+
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
 
   useEffect(() => {
     if (!userInfo) {
-      navigation.navigate("Login"); 
+      navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Visa QR</Text>
