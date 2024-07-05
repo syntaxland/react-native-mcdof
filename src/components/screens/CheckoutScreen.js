@@ -40,7 +40,7 @@ const CheckoutScreen = () => {
     }
   }, [userInfo, navigation]);
 
-  const [order_id, setOrderId] = useState(""); 
+  const [order_id, setOrderId] = useState("");
   console.log("order_id checkout:", order_id);
 
   const [paymentMethod] = useState("Paystack");
@@ -191,7 +191,7 @@ const CheckoutScreen = () => {
                   borderRadius: 5,
                   marginTop: 10,
                 }}
-                disabled={cartItems?.length === 0}
+                disabled={cartItems?.length === 0 || order_id === "" || loading}
                 onPress={createOrderHandler}
               >
                 <Text
