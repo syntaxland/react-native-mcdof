@@ -197,11 +197,12 @@ const CardPayment = ({
             </View>
 
             <TouchableOpacity
-              style={styles.button}
+              // style={styles.roundedPrimaryBtn}
+              style={!isFormValid() ? styles.roundedDisabledBtn : styles.roundedPrimaryBtn}
               onPress={submitHandler}
               disabled={!isFormValid()}
             >
-              <Text style={styles.buttonText}>
+              <Text style={styles.btnText}>
                 Pay ({formatAmount(amount)} {currency})
               </Text>
             </TouchableOpacity>
@@ -289,6 +290,29 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     padding: 10,
+  },
+  roundedPrimaryBtn: {
+    backgroundColor: "#007bff",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  roundedDisabledBtn: {
+    backgroundColor: "#d3d3d3",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 

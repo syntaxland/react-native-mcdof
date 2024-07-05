@@ -59,7 +59,15 @@ const PaysofterAccountFund = ({
     debitPaysofterAccountState;
 
   const [accountId, setAccountId] = useState("");
+
+  const [accountIdError, setAccountIdError] = useState("");
+
   const [securityCode, setSecurityCode] = useState("");
+
+  const [securityCodeError, setSecurityCodeError] = useState("");
+
+  const [formError, setFormError] = useState("");
+
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showAccountInfoModal, setShowAccountInfoModal] = useState(false);
   const [showSecurityCodeModal, setShowSecurityCodeModal] = useState(false);
@@ -83,16 +91,60 @@ const PaysofterAccountFund = ({
     public_api_key: paysofterPublicKey,
   };
 
+  const handleFieldChange = (fieldName, value) => {
+    switch (fieldName) {
+      case "accountId":
+        setAccountId(value);
+        setAccountIdError("");
+        break;
+      case "securityCode":
+        setSecurityCode(value);
+        setSecurityCodeError("");
+        break;
+      default:
+        break;
+    }
+  };
+
+  // const submitHandler = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     await AsyncStorage.setItem(
+  //       "debitAccountData",
+  //       JSON.stringify(debitAccountData)
+  //     );
+  //     dispatch(debitPaysofterAccountFund(debitAccountData));
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
   const submitHandler = async (e) => {
     e.preventDefault();
-    try {
+
+    if (!accountId) {
+      setAccountIdError("Please enter Account ID.");
+      return;
+    } else {
+      setAccountIdError("");
+    }
+
+    if (!securityCode) {
+      setSecurityCodeError("Please enter Security Code.");
+      return;
+    } else {
+      setSecurityCodeError("");
+    }
+
+    if (!accountId || !securityCode) {
+      setFormError("Please attend to the errors within the form.");
+      return;
+    } else {
+      dispatch(debitPaysofterAccountFund(debitAccountData));
       await AsyncStorage.setItem(
         "debitAccountData",
         JSON.stringify(debitAccountData)
       );
-      dispatch(debitPaysofterAccountFund(debitAccountData));
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -140,7 +192,7 @@ const PaysofterAccountFund = ({
                 {/* <Text style={styles.title}>Paysofter Account Fund</Text>
             <Button title="Info" onPress={handleAccountInfoModalShow} /> */}
                 <View style={styles.labelContainer}>
-                  <Text style={styles.title}>Paysofter Account Fund</Text>
+                  <Text style={styles.title}>Paysofter Account Fund </Text>
                   <TouchableOpacity onPress={handleAccountInfoModalShow}>
                     <FontAwesomeIcon
                       icon={faInfoCircle}
@@ -183,6 +235,8 @@ const PaysofterAccountFund = ({
               {error && <Message variant="danger">{error}</Message>}
               {loading && <Loader />}
 
+              {formError && <Message variant="danger">{formError}</Message>}
+
               <View style={styles.formGroup}>
                 <View style={styles.labelContainer}>
                   <Text style={styles.label}>Account ID </Text>
@@ -199,11 +253,17 @@ const PaysofterAccountFund = ({
                     style={styles.input}
                     placeholder="Enter Paysofter Account ID"
                     value={accountId}
-                    onChangeText={(text) => setAccountId(text)}
+                    // onChangeText={(text) => setAccountId(text)}
+
+                    onChangeText={(value) =>
+                      handleFieldChange("accountId", value)
+                    }
                     maxLength={12}
                   />
                   {/* <Button title="Info" onPress={handleInfoModalShow} /> */}
                 </View>
+
+                <Text style={styles.errorText}>{accountIdError}</Text>
               </View>
 
               <Modal
@@ -249,7 +309,11 @@ const PaysofterAccountFund = ({
                     style={styles.input}
                     placeholder="Enter Account Security Code"
                     value={securityCode}
-                    onChangeText={(text) => setSecurityCode(text)}
+                    // onChangeText={(text) => setSecurityCode(text)}
+
+                    onChangeText={(value) =>
+                      handleFieldChange("securityCode", value)
+                    }
                     secureTextEntry={!securityCodeVisible}
                     maxLength={4}
                   />
@@ -278,6 +342,8 @@ const PaysofterAccountFund = ({
                     </Text>
                   </TouchableOpacity>
                 </View>
+
+                <Text style={styles.errorText}>{securityCodeError}</Text>
               </View>
 
               <Modal
@@ -297,12 +363,7 @@ const PaysofterAccountFund = ({
                       the security code? Refresh your paysofter account page,
                       logout and login, or clear browsing data.
                     </Text>
-                    <Button
-                      title="Learn More"
-                      onPress={() => {
-                        /* Link to paysofter.com */
-                      }}
-                    />
+                    <Button title="Learn More" onPress={handleLearnMore} />
                     <Button
                       title="Close"
                       onPress={handleSecurityCodeModalClose}
@@ -312,8 +373,11 @@ const PaysofterAccountFund = ({
               </Modal>
 
               <View style={styles.submitContainer}>
-                <TouchableOpacity onPress={submitHandler}>
-                  <Text style={styles.roundedPrimaryBtn}>{`Pay (${formatAmount(
+                <TouchableOpacity
+                  onPress={submitHandler}
+                  style={styles.roundedPrimaryBtn}
+                >
+                  <Text style={styles.btnText}>{`Pay (${formatAmount(
                     amount
                   )} ${currency})`}</Text>
                 </TouchableOpacity>
@@ -342,6 +406,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
@@ -408,7 +473,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
   },
-
+  roundedDisabledBtn: {
+    backgroundColor: "#d3d3d3",
+    color: "#fff",
+    padding: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  btnText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
   errorContainer: {
     paddingVertical: 10,
     alignItems: "center",
@@ -420,6 +498,11 @@ const styles = StyleSheet.create({
     color: "red",
     textAlign: "center",
     padding: 10,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 5,
   },
 });
 

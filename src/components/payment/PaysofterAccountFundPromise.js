@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Linking,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -173,7 +174,7 @@ const PaysofterAccountFundPromise = ({
               <View style={styles.header}>
                 <View style={styles.labelContainer}>
                   <Text style={styles.title}>
-                    Paysofter Account Fund ({currency}){" "}
+                    Promise Account Fund ({currency}){" "}
                   </Text>
                   <TouchableOpacity onPress={handleAccountInfoModalShow}>
                     <FontAwesomeIcon
@@ -193,12 +194,10 @@ const PaysofterAccountFundPromise = ({
               >
                 <View style={styles.modalOverlay}>
                   <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>
-                      Paysofter Account Fund
-                    </Text>
+                    <Text style={styles.modalTitle}>Promise Account Fund</Text>
                     <Text style={styles.modalText}>
-                      Paysofter Account Fund option settles payments using the
-                      payer's funded Paysofter Account Fund.
+                      Paysofter Promise Account Fund option settles payments
+                      using the payer's funded Paysofter Account Fund.
                     </Text>
                     <View style={styles.learnMoreBtn}>
                       <Button
@@ -308,11 +307,11 @@ const PaysofterAccountFundPromise = ({
                   <View style={styles.modalOverlay}>
                     <View style={styles.modalContent}>
                       <Text style={styles.modalTitle}>
-                        Paysofter Account ID
+                        Promise Account Fund
                       </Text>
                       <Text style={styles.modalText}>
-                        A uniquely assigned 12-digit Paysofter Account ID. Don't
-                        have a Paysofter account?{" "}
+                        Paysofter Promise Account Fund option settles payments
+                        using the payer's funded Paysofter Account Fund.
                       </Text>
                       <View style={styles.learnMoreBtn}>
                         <Button
@@ -345,14 +344,22 @@ const PaysofterAccountFundPromise = ({
                       <Text style={styles.modalText}>
                         A 4-digit randomly generated Paysofter Account Security
                         Code that expires at a given time (e.g. every hour).{" "}
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
+                         style={styles.roundedPrimaryBtn}
                           onPress={() =>
                             Linking.openURL("https://paysofter.com/")
                           }
                         >
                           <Text style={styles.modalLink}>Learn More</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                        <Button
+                          title="Learn More"
+                          onPress={() =>
+                            Linking.openURL("https://paysofter.com/")
+                          }
+                        />
                       </Text>
+
                       <Button
                         title="Close"
                         onPress={handleSecurityCodeModalClose}
@@ -424,6 +431,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,

@@ -10,6 +10,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Linking
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
