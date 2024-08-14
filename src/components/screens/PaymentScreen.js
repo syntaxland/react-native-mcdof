@@ -7,19 +7,29 @@ import {
   ScrollView,
   SafeAreaView,
   Modal,
-  // Button ,
+  Button ,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowLeft, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useSelector } from "react-redux";
-import PaystackPayment from "../payment/PaystackPayment";
-import Paysofter from "../payment/Paysofter";
+import { useDispatch, useSelector } from "react-redux";
+import { clearCart } from "../../redux/actions/cartActions";
+import {
+  createPayment,
+  resetPaymentState,
+} from "../../redux/actions/paymentActions";
+import ApplyPromoCode from "../../ApplyPromoCode";
+import Message from "../../Message";
+import Loader from "../../Loader";
 import { styles } from "../screenStyles";
+import { formatAmount } from "../../FormatAmount";
 import axios from "axios";
 import { API_URL } from "../../config/apiConfig";
+import PaystackPayment from "../payment/PaystackPayment";
+import { Paysofter } from "react-native-paysofter";
 
 const PaymentScreen = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const route = useRoute();
   const order_id = route.params.order_id;
@@ -33,6 +43,13 @@ const PaymentScreen = () => {
       navigation.navigate("Login");
     }
   }, [userInfo, navigation]);
+
+  const createdAt = new Date().toISOString();
+
+  const [paymentInitiated, setPaymentInitiated] = useState(false);
+
+  const paymentCreate = useSelector((state) => state.paymentCreate);
+  const { loading, success, error } = paymentCreate;
 
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
@@ -140,6 +157,52 @@ const PaymentScreen = () => {
   };
   console.log("paymentData:", paymentData);
 
+  const handleOnSuccess = () => {
+    console.log("handling onSuccess...");
+    const paymentDetails = {
+      reference: reference,
+      order_id: order_id,
+      amount: totalPrice,
+      email: userEmail,
+
+      items_amount: itemsPrice,
+      final_items_amount: finalItemsPrice,
+      promo_code_discount_amount: promoDiscount,
+      promo_code_discount_percentage: discountPercentage,
+      final_total_amount: promoTotalPrice,
+    };
+    dispatch(createPayment(paymentDetails));
+  };
+
+  const onSuccess = () => {
+    handleOnSuccess();
+  };
+
+  const handleOnClose = () => {
+    console.log("handling onClose...");
+    // window.location.reload();
+    // window.location.href = "/";
+  };
+
+  const onClose = () => {
+    handleOnClose();
+  };
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        dispatch(clearCart());
+        dispatch(resetPaymentState());
+        navigation.navigate("Home");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [dispatch, success, navigation]);
+
+  const initiatePayment = () => {
+    setPaymentInitiated(true);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -147,6 +210,12 @@ const PaymentScreen = () => {
           <FontAwesomeIcon color="blue" icon={faArrowLeft} /> Previous
         </Text>
       </TouchableOpacity>
+
+      {loading && <Loader />}
+      {error && <Message variant="danger">{error}</Message>}
+      {success && (
+        <Message variant="success">Order successfully created!</Message>
+      )}
 
       <ScrollView>
         <View style={styles.container}>
@@ -170,15 +239,64 @@ const PaymentScreen = () => {
           )}
 
           {selectedPaymentGateway === "paysofter" && (
-            <Paysofter
-              paymentData={paymentData}
-              reference={reference}
-              order_id={order_id}
-              userEmail={userEmail}
-              paysofterPublicKey={paysofterPublicKey}
-              currency={currency}
-              amount={finalItemsPrice}
-            />
+            <>
+              <Text style={styles.title}>Paysofter</Text>
+
+              <View style={styles.viewContainer}>
+                <Text>Order ID: {paymentData.order_id}</Text>
+                <Text>
+                  Shipping Cost: {formatAmount(paymentData.shippingPrice)}{" "}
+                  {paymentData?.currency}{" "}
+                </Text>
+                <Text>
+                  Tax: {formatAmount(paymentData.taxPrice)}{" "}
+                  {paymentData?.currency}{" "}
+                </Text>
+                <Text>
+                  Total Amount: {formatAmount(paymentData.totalPrice)}{" "}
+                  {paymentData?.currency}{" "}
+                </Text>
+                <Text>
+                  Promo Discount: {formatAmount(paymentData?.promoDiscount)}{" "}
+                  {paymentData?.currency}{" "}
+                </Text>
+                <Text>
+                  Final Total Amount:{" "}
+                  {formatAmount(paymentData?.finalTotalPrice)}{" "}
+                  {paymentData?.currency}{" "}
+                </Text>
+                <Text>Timestamp: {createdAt}</Text>
+              </View>
+
+              <View style={styles.buttonContainer}>
+                <ApplyPromoCode order_id={paymentData.order_id} />
+              </View>
+              <View style={styles.buttonContainer}>
+                <Button
+                  // style={styles.buttonDark}
+                  title="Pay Now"
+                  onPress={initiatePayment}
+                  // color="#343a40"
+                />
+
+                {paymentInitiated && (
+                  <>
+                    <Paysofter
+                      email={userEmail}
+                      currency={currency}
+                      amount={finalItemsPrice}
+                      paysofterPublicKey={paysofterPublicKey}
+                      onSuccess={onSuccess}
+                      onClose={onClose}
+                      paymentRef={reference}
+                      showPromiseOption={true}
+                      showFundOption={true}
+                      showCardOption={true}
+                    />
+                  </>
+                )}
+              </View>
+            </>
           )}
 
           {/* Modal for Paysofter Account Info */}
